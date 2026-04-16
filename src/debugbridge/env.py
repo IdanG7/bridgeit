@@ -7,6 +7,7 @@ module has no pybag dependency and is safe to import on any platform.
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 from dataclasses import dataclass, field
@@ -70,6 +71,73 @@ def check_debugging_tools() -> EnvCheckResult:
         found=found,
         missing=missing,
         guidance=None if ok else INSTALL_GUIDANCE,
+    )
+
+
+CLAUDE_CLI_GUIDANCE = (
+    "Claude Code CLI not found on PATH. Install via:\n"
+    "  https://docs.claude.com/en/docs/claude-code/getting-started\n"
+    "After install, run `claude --version` to confirm, then re-run `debugbridge doctor`."
+)
+
+CLAUDE_BYPASS_GUIDANCE = (
+    "The `claude --dangerously-skip-permissions` first-run prompt has not been\n"
+    "acknowledged yet. Autonomous `debugbridge fix --auto` runs will hang on\n"
+    "the interactive prompt the first time they launch.\n"
+    "Acknowledge once (interactively): `claude --dangerously-skip-permissions --help`\n"
+    "This is a warning, not a hard failure."
+)
+
+
+def check_claude_cli() -> EnvCheckResult:
+    """Detect the `claude` CLI on PATH."""
+    resolved = shutil.which("claude")
+    if resolved:
+        return EnvCheckResult(ok=True, found={"claude": resolved}, missing=[], guidance=None)
+    return EnvCheckResult(ok=False, found={}, missing=["claude"], guidance=CLAUDE_CLI_GUIDANCE)
+
+
+def check_claude_bypass_acknowledged(settings_path: Path | None = None) -> EnvCheckResult:
+    """Return ok=True iff ~/.claude/settings.json has skipDangerousModePermissionPrompt=true.
+
+    Reads only the single key that suppresses the first-run
+    ``--dangerously-skip-permissions`` prompt. The Phase 2a autonomous fix path
+    requires this acknowledgement to avoid hanging on an interactive
+    confirmation. Missing-ack is a warning, not a hard failure — see
+    ``debugbridge doctor`` wiring.
+
+    Tests pass an explicit ``settings_path`` to avoid touching the user's
+    real home directory.
+    """
+    path = settings_path if settings_path is not None else Path.home() / ".claude" / "settings.json"
+    if not path.exists():
+        return EnvCheckResult(
+            ok=False,
+            found={},
+            missing=["claude-bypass-ack"],
+            guidance=CLAUDE_BYPASS_GUIDANCE,
+        )
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return EnvCheckResult(
+            ok=False,
+            found={},
+            missing=["claude-bypass-ack"],
+            guidance=CLAUDE_BYPASS_GUIDANCE,
+        )
+    if isinstance(data, dict) and data.get("skipDangerousModePermissionPrompt") is True:
+        return EnvCheckResult(
+            ok=True,
+            found={"claude-bypass-ack": str(path)},
+            missing=[],
+            guidance=None,
+        )
+    return EnvCheckResult(
+        ok=False,
+        found={},
+        missing=["claude-bypass-ack"],
+        guidance=CLAUDE_BYPASS_GUIDANCE,
     )
 
 

@@ -14,7 +14,11 @@ from rich.console import Console
 from rich.table import Table
 
 from debugbridge import __version__
-from debugbridge.env import check_debugging_tools
+from debugbridge.env import (
+    check_claude_bypass_acknowledged,
+    check_claude_cli,
+    check_debugging_tools,
+)
 
 app = typer.Typer(
     name="debugbridge",
@@ -69,8 +73,10 @@ def serve(
 
 @app.command()
 def doctor() -> None:
-    """Check that Windows Debugging Tools are installed and findable."""
+    """Check that Windows Debugging Tools and Claude Code prereqs are present."""
     result = check_debugging_tools()
+    claude_result = check_claude_cli()
+    bypass_result = check_claude_bypass_acknowledged()
 
     table = Table(title="DebugBridge environment check", show_header=True)
     table.add_column("Component")
@@ -84,14 +90,53 @@ def doctor() -> None:
         else:
             table.add_row(name, "[red]missing[/red]", "—")
 
+    # Phase 2a additions — claude CLI (hard fail) and bypass acknowledgement (warning).
+    if claude_result.ok:
+        table.add_row(
+            "claude CLI",
+            "[green]found[/green]",
+            claude_result.found.get("claude", "—"),
+        )
+    else:
+        table.add_row("claude CLI", "[red]missing[/red]", "—")
+
+    if bypass_result.ok:
+        table.add_row(
+            "claude bypass ack'd",
+            "[green]found[/green]",
+            bypass_result.found.get("claude-bypass-ack", "—"),
+        )
+    else:
+        # Yellow, not red — missing bypass ack is a warning, not a hard failure.
+        table.add_row("claude bypass ack'd", "[yellow]warning[/yellow]", "—")
+
     console.print(table)
 
-    if result.ok:
-        console.print("\n[green]All required Debugging Tools are present.[/green]")
+    hard_fail = (not result.ok) or (not claude_result.ok)
+
+    if not hard_fail:
+        console.print("\n[green]All required components are present.[/green]")
+        if not bypass_result.ok:
+            console.print(
+                "\n[yellow]Warning: claude bypass-permission prompt not yet acknowledged.[/yellow]\n"
+            )
+            console.print(bypass_result.guidance or "")
         raise typer.Exit(code=0)
 
-    console.print(f"\n[yellow]Missing: {', '.join(result.missing)}[/yellow]\n")
-    console.print(result.guidance or "")
+    if not result.ok:
+        console.print(f"\n[yellow]Missing: {', '.join(result.missing)}[/yellow]\n")
+        console.print(result.guidance or "")
+
+    if not claude_result.ok:
+        console.print("\n[yellow]Missing: claude CLI[/yellow]\n")
+        console.print(claude_result.guidance or "")
+
+    if not bypass_result.ok:
+        console.print(
+            "\n[yellow]Warning: claude bypass-permission prompt not yet acknowledged.[/yellow]\n"
+        )
+        console.print(bypass_result.guidance or "")
+
     raise typer.Exit(code=1)
 
 
