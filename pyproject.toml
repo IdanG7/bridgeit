@@ -1,0 +1,70 @@
+[project]
+name = "debugbridge"
+version = "0.1.0"
+description = "Remote crash capture MCP server for native Windows applications — exposes DbgEng debugger state to AI clients via MCP."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+    { name = "Idan Gurevich", email = "idan.gurevich@gmail.com" }
+]
+requires-python = ">=3.11"
+keywords = ["mcp", "debugger", "dbgeng", "windbg", "pybag", "claude", "ai"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Debuggers",
+]
+dependencies = [
+    "mcp[cli]>=1.27,<1.28",
+    "Pybag>=2.2.16",
+    "pydantic>=2",
+    "typer>=0.12",
+    "rich>=13",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.7",
+    "pyright>=1.1",
+]
+
+[project.scripts]
+debugbridge = "debugbridge.cli:app"
+
+[build-system]
+requires = ["uv_build>=0.9.26,<0.10.0"]
+build-backend = "uv_build"
+
+# ---------------------------------------------------------------------------
+# Tooling
+# ---------------------------------------------------------------------------
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+ignore = ["E501"]  # line length handled by formatter
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pyright]
+include = ["src", "tests"]
+pythonVersion = "3.11"
+typeCheckingMode = "basic"
+reportMissingTypeStubs = false  # pybag has no stubs
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: tests that require Windows Debugging Tools and a live process (deselect with '-m \"not integration\"')",
+]
+addopts = ["-ra", "--strict-markers"]

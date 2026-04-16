@@ -1,0 +1,46 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+
+# Caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyright/
+.coverage
+htmlcov/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts for test fixtures
+tests/fixtures/crash_app/build/
+tests/fixtures/crash_app/**/*.pdb
+tests/fixtures/crash_app/**/*.ilk
+tests/fixtures/crash_app/**/*.obj
+
+# Demo recordings
+demo/*.mp4
+demo/*.mov
+
+# Local secrets / env overrides
+.env
+.env.local
+
+# Claude Code local session state (per-machine planning / permissions)
+.claude/
