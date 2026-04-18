@@ -1,11 +1,16 @@
-"""Crash-briefing assembly (task 2a.1.3 - source-snippet extractor half).
+"""Crash-briefing assembly (tasks 2a.1.3 + 2a.1.4).
 
 ``extract_source_snippets`` walks a call stack, resolves in-repo file paths,
 merges overlapping plus/minus N-line ranges per file, and returns a dict of
-``repo-relative Path -> snippet string`` for use by the briefing renderer
-(landing in task 2a.1.4).
+``repo-relative Path -> snippet string`` for use by the briefing renderer.
 
-Design notes:
+``render_briefing`` turns a :class:`CrashCapture` plus extracted snippets into
+a structured Markdown document that Claude Code reads as its crash briefing.
+
+``write_briefing`` writes that Markdown to disk with UTF-8 encoding and
+unix line endings.
+
+Design notes (snippet extractor):
 - Frames without ``file`` or ``line`` metadata are silently dropped.
 - Paths outside the repo (stdlib, third-party, Windows system files) are
   silently dropped - the agent should only propose fixes to user code.
@@ -21,9 +26,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from debugbridge.fix.models import CallFrame
+from debugbridge.fix.models import CallFrame, CrashCapture
 
-__all__ = ["extract_source_snippets"]
+__all__ = ["extract_source_snippets", "render_briefing", "write_briefing"]
 
 
 def _repo_relative(repo: Path, candidate: Path) -> Path | None:
@@ -115,6 +120,124 @@ def extract_source_snippets(
     return out
 
 
-# TODO(task 2a.1.4): add render_briefing(capture, snippets, build_cmd) -> str
-# TODO(task 2a.1.4): add write_briefing(path, content) -> None
+def render_briefing(
+    capture: CrashCapture,
+    snippets: dict[Path, str],
+    build_cmd: str | None = None,
+) -> str:
+    """Render a Markdown crash briefing for Claude Code consumption.
+
+    Sections appear in a fixed order: Crash briefing header, Exception,
+    Call stack, Locals at frame 0, Source context, Your task, Constraints,
+    Available MCP tools.
+
+    Never renders Python ``None`` as literal text -- uses ``"?"``, ``"---"``
+    or ``"n/a"`` instead.
+    """
+    parts: list[str] = []
+    parts.append(f"# Crash briefing — crash-{capture.crash_hash}\n")
+    parts.append(f"\n**PID:** {capture.pid}")
+    if capture.process_name:
+        parts.append(f" | **Process:** {capture.process_name}")
+    if capture.binary_path:
+        parts.append(f" | **Binary:** {capture.binary_path}")
+    parts.append("\n")
+
+    # Exception
+    parts.append("\n## Exception\n\n")
+    if capture.exception is not None:
+        exc = capture.exception
+        parts.append(f"- **Code:** {exc.code_name} (`0x{exc.code:08X}`)\n")
+        parts.append(f"- **Address:** `0x{exc.address:016X}`\n")
+        parts.append(f"- **Description:** {exc.description or 'n/a'}\n")
+        parts.append(f"- **First chance:** {exc.is_first_chance}\n")
+    else:
+        parts.append("No exception on last event (process paused without crash).\n")
+
+    # Call stack
+    parts.append("\n## Call stack\n\n")
+    if capture.callstack:
+        parts.append(
+            "| # | Module | Function | File | Line |\n|---|--------|----------|------|------|\n"
+        )
+        for f in capture.callstack:
+            parts.append(
+                f"| {f.index} "
+                f"| {f.module or '?'} "
+                f"| {f.function or '?'} "
+                f"| {f.file or '---'} "
+                f"| {f.line if f.line is not None else '---'} |\n"
+            )
+    else:
+        parts.append("_No call stack frames captured._\n")
+
+    # Locals
+    parts.append("\n## Locals at frame 0\n\n")
+    if capture.locals_:
+        parts.append("| Name | Type | Value |\n|------|------|-------|\n")
+        for loc in capture.locals_:
+            val = loc.value.replace("|", "\\|")  # escape pipes in table
+            parts.append(f"| {loc.name} | {loc.type} | {val} |\n")
+    else:
+        parts.append("_No locals captured._\n")
+
+    # Source context
+    parts.append("\n## Source context\n\n")
+    if snippets:
+        for path, snippet in snippets.items():
+            parts.append(f"### `{path}`\n\n```cpp\n{snippet}\n```\n\n")
+    else:
+        parts.append(
+            "_No in-repo source files referenced by the stack"
+            " --- agent should use MCP to call"
+            " get_callstack/get_locals for more frames._\n"
+        )
+
+    # Your task
+    parts.append("\n## Your task\n\n")
+    parts.append("1. Read the source files listed above.\n")
+    parts.append("2. Identify the root cause of the crash.\n")
+    parts.append("3. Apply the minimal fix.\n")
+    if build_cmd:
+        parts.append(f"4. Run the build command: `{build_cmd}`\n")
+    else:
+        parts.append("4. Do not attempt to build (no build command provided).\n")
+    parts.append("5. Summarize the root cause in 1-2 sentences.\n")
+
+    # Constraints
+    parts.append("\n## Constraints\n\n")
+    parts.append("- Only edit files listed in the Source context section.\n")
+    parts.append("- Prefer surgical edits over rewrites.\n")
+    parts.append("- Do not modify third-party or standard library code.\n")
+    parts.append("- Do not add tests for unrelated behavior.\n")
+
+    # Available MCP tools
+    parts.append("\n## Available MCP tools\n\n")
+    tools = [
+        "attach_process",
+        "detach_process",
+        "get_exception",
+        "get_callstack",
+        "get_threads",
+        "get_locals",
+        "set_breakpoint",
+        "step_next",
+        "continue_execution",
+    ]
+    for t in tools:
+        parts.append(f"- `mcp__debugbridge__{t}`\n")
+    parts.append(
+        "\nDo NOT call `detach_process` or `continue_execution`"
+        " --- those would release or resume the target.\n"
+    )
+
+    return "".join(parts)
+
+
+def write_briefing(path: Path, content: str) -> None:
+    """Write briefing content to a file with UTF-8 encoding and ``\\n`` line endings."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8", newline="\n")
+
+
 # TODO(task 2a.3.6): add append_retry_feedback(briefing_path, attempt_num, build_output, claude_result_text)

@@ -1,14 +1,15 @@
-"""Tests for fix/briefing.py source-snippet extractor (task 2a.1.3).
+"""Tests for fix/briefing.py (tasks 2a.1.3 + 2a.1.4).
 
-The briefing *renderer* itself (render_briefing) lands in task 2a.1.4.
+Task 2a.1.3: source-snippet extractor (extract_source_snippets).
+Task 2a.1.4: briefing Markdown renderer (render_briefing, write_briefing).
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from debugbridge.fix.briefing import extract_source_snippets
-from debugbridge.models import CallFrame
+from debugbridge.fix.briefing import extract_source_snippets, render_briefing, write_briefing
+from debugbridge.fix.models import CallFrame, CrashCapture, ExceptionInfo, Local
 
 
 def _frame(file: str | None, line: int | None, function: str = "f") -> CallFrame:
@@ -160,3 +161,101 @@ def test_extract_resolves_absolute_and_relative_paths(tmp_path: Path) -> None:
     key = next(iter(result))
     # Key is repo-relative
     assert key == Path("src/crash.cpp") or key == Path("src") / "crash.cpp"
+
+
+# ---------------------------------------------------------------------------
+# Task 2a.1.4 — render_briefing / write_briefing
+# ---------------------------------------------------------------------------
+
+
+def test_render_briefing_includes_all_sections() -> None:
+    """Full CrashCapture with exception, stack, locals, snippet -> all sections in order."""
+    capture = CrashCapture(
+        pid=1234,
+        process_name="test.exe",
+        binary_path="C:\\test\\test.exe",
+        exception=ExceptionInfo(
+            code=0xC0000005,
+            code_name="EXCEPTION_ACCESS_VIOLATION",
+            address=0x00007FF6_12345678,
+            description="Read access violation at 0x0",
+            is_first_chance=True,
+        ),
+        callstack=[
+            CallFrame(
+                index=0,
+                function="crash_func",
+                module="test",
+                file="main.cpp",
+                line=42,
+                instruction_pointer=0x1000,
+            ),
+            CallFrame(
+                index=1,
+                function="caller",
+                module="test",
+                file="main.cpp",
+                line=30,
+                instruction_pointer=0x2000,
+            ),
+            CallFrame(
+                index=2,
+                function="main",
+                module="test",
+                file="main.cpp",
+                line=10,
+                instruction_pointer=0x3000,
+            ),
+        ],
+        locals_=[
+            Local(name="ptr", type="int*", value="0x0000000000000000"),
+            Local(name="count", type="int", value="42"),
+        ],
+        crash_hash="abcd1234",
+    )
+    snippets = {Path("main.cpp"): "// lines 27-57\nint main() { ... }"}
+    output = render_briefing(capture, snippets, build_cmd="cmake --build build")
+
+    # Sections must appear in this exact order.
+    expected_sections = [
+        "# Crash briefing",
+        "## Exception",
+        "## Call stack",
+        "## Locals at frame 0",
+        "## Source context",
+        "## Your task",
+        "## Constraints",
+        "## Available MCP tools",
+    ]
+    last_pos = -1
+    for heading in expected_sections:
+        pos = output.find(heading)
+        assert pos > last_pos, (
+            f"Section {heading!r} not found or out of order (pos={pos}, last={last_pos})"
+        )
+        last_pos = pos
+
+    # Build command appears verbatim.
+    assert "cmake --build build" in output
+
+    # No literal Python "None" in the output.
+    assert "None" not in output
+
+
+def test_render_briefing_minimal_capture_no_crash() -> None:
+    """Degenerate CrashCapture (no exception, no stack, no locals) -> doesn't crash, >= 400 bytes."""
+    capture = CrashCapture(pid=0, crash_hash="unknown")
+    output = render_briefing(capture, {}, build_cmd=None)
+
+    assert len(output) >= 400, f"Output too short: {len(output)} bytes"
+    assert "No exception" in output
+    assert "Do not attempt to build" in output
+
+
+def test_write_briefing_creates_file(tmp_path: Path) -> None:
+    """write_briefing writes UTF-8 content to disk."""
+    target = tmp_path / "briefing.md"
+    write_briefing(target, "# test content\n")
+    assert target.exists()
+    content = target.read_text(encoding="utf-8")
+    assert content == "# test content\n"
