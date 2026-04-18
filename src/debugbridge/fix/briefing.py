@@ -245,18 +245,24 @@ def append_retry_feedback(
     attempt_num: int,
     build_output: str,
     claude_result_text: str | None = None,
+    *,
+    failure_label: str = "Build failed",
 ) -> None:
     """Append a 'Previous attempt' section to an existing briefing file.
 
     The build output is truncated to 2000 characters to keep briefings
     within reasonable token budgets.  Claude's previous response (if
     available) is included as a blockquote capped at 500 characters.
+
+    ``failure_label`` controls the heading before the output block --
+    use ``"Build passed but tests failed"`` when the build succeeded but
+    the test command failed.
     """
     section = f"\n\n## Previous attempt {attempt_num}\n\n"
     if claude_result_text:
         section += f"Claude proposed:\n> {claude_result_text[:500]}\n\n"
     if len(build_output) > 2000:
         build_output = build_output[:2000] + "\n[output truncated]"
-    section += f"Build failed:\n\n```\n{build_output}\n```\n\nPlease produce a different fix taking this build error into account.\n"
+    section += f"{failure_label}:\n\n```\n{build_output}\n```\n\nPlease produce a different fix taking this build error into account.\n"
     with open(briefing_path, "a", encoding="utf-8") as f:
         f.write(section)

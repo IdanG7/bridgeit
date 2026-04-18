@@ -205,6 +205,12 @@ def run_autonomous(
             if build_cmd:
                 build_ok, build_output = run_command(build_cmd, cwd=worktree)
 
+            # Test (only if build passed and test_cmd provided)
+            test_ok: bool | None = None
+            test_output: str | None = None
+            if build_ok and test_cmd is not None:
+                test_ok, test_output = run_command(test_cmd, cwd=worktree)
+
             duration = time.monotonic() - t0
             attempts.append(
                 AttemptRecord(
@@ -212,11 +218,16 @@ def run_autonomous(
                     claude_result=claude_result,
                     build_ok=build_ok,
                     build_output=build_output,
+                    test_ok=test_ok,
+                    test_output=test_output,
                     duration_s=duration,
                 )
             )
 
-            if build_ok:
+            # Overall success: build passed AND tests passed (or not requested)
+            step_ok = build_ok and (test_ok in (True, None))
+
+            if step_ok:
                 # Success -- emit patch
                 diff = capture_diff(worktree)
                 patch_path = write_patch(repo, crash_hash, diff) if diff else None
@@ -235,12 +246,19 @@ def run_autonomous(
                     worktree_preserved=False,
                 )
 
-            # Build failed -- append feedback for next iteration
+            # Build or test failed -- append feedback for next iteration
+            if not build_ok:
+                feedback_output = build_output
+                feedback_label = "Build failed"
+            else:
+                feedback_output = test_output or ""
+                feedback_label = "Build passed but tests failed"
             append_retry_feedback(
                 wt_briefing,
                 attempt_num,
-                build_output,
+                feedback_output,
                 claude_result.result,
+                failure_label=feedback_label,
             )
 
         # All attempts exhausted

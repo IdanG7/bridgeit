@@ -400,3 +400,108 @@ def test_auto_loop_retries_on_build_failure_with_appended_output(
     # Second briefing should contain the build error from attempt 1
     assert "Previous attempt" in briefing_snapshots[1]
     assert "ld: undefined symbol x" in briefing_snapshots[1]
+
+
+# ---------------------------------------------------------------------------
+# Test-command support tests (task 2a.3.7)
+# ---------------------------------------------------------------------------
+
+
+def test_auto_loop_runs_test_cmd_after_build(
+    git_repo: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """run_autonomous with build_cmd + test_cmd: both pass on attempt 1."""
+    _patch_autonomous_deps(monkeypatch, build_ok=True)
+
+    # run_command: first call is build (pass), second call is test (pass)
+    cmd_calls: list[str] = []
+
+    def fake_run_command(cmd, cwd, timeout=600):
+        cmd_calls.append(cmd)
+        return (True, "ok")
+
+    monkeypatch.setattr(
+        "debugbridge.fix.dispatcher.run_command",
+        fake_run_command,
+    )
+
+    from debugbridge.fix.dispatcher import run_autonomous
+
+    result = run_autonomous(
+        repo=git_repo,
+        pid=42,
+        host="127.0.0.1",
+        port=8585,
+        build_cmd="make",
+        test_cmd="make test",
+        max_attempts=3,
+    )
+
+    assert result.ok is True
+    assert len(result.attempts) == 1
+    assert result.attempts[0].build_ok is True
+    assert result.attempts[0].test_ok is True
+    # Both build and test commands were called
+    assert len(cmd_calls) == 2
+    assert cmd_calls[0] == "make"
+    assert cmd_calls[1] == "make test"
+
+
+def test_auto_loop_test_failure_triggers_retry(
+    git_repo: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Build always passes; test fails first, passes second → retry with feedback."""
+    _patch_autonomous_deps(monkeypatch, build_ok=True)
+
+    call_count = 0
+
+    def fake_run_command(cmd, cwd, timeout=600):
+        nonlocal call_count
+        call_count += 1
+        if cmd == "make":
+            return (True, "build ok")
+        # test cmd
+        if call_count == 2:
+            # First test call (second run_command call overall)
+            return (False, "test fail")
+        return (True, "tests ok")
+
+    monkeypatch.setattr(
+        "debugbridge.fix.dispatcher.run_command",
+        fake_run_command,
+    )
+
+    # Track briefing content across claude calls
+    briefing_snapshots: list[str] = []
+
+    def fake_claude_headless(**kwargs):
+        briefing_path = kwargs.get("briefing_path")
+        if briefing_path and Path(briefing_path).exists():
+            briefing_snapshots.append(Path(briefing_path).read_text(encoding="utf-8"))
+        return _canned_claude_result(ok=True)
+
+    monkeypatch.setattr(
+        "debugbridge.fix.dispatcher.run_claude_headless",
+        fake_claude_headless,
+    )
+
+    from debugbridge.fix.dispatcher import run_autonomous
+
+    result = run_autonomous(
+        repo=git_repo,
+        pid=42,
+        host="127.0.0.1",
+        port=8585,
+        build_cmd="make",
+        test_cmd="make test",
+        max_attempts=3,
+    )
+
+    assert result.ok is True
+    assert len(result.attempts) == 2
+    assert result.attempts[0].test_ok is False
+    # Second attempt should have seen retry feedback about test failure
+    assert len(briefing_snapshots) >= 2
+    assert "tests failed" in briefing_snapshots[1].lower()
