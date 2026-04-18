@@ -13,7 +13,10 @@ Architecture constraint (PLAN.md decision #1): this module does NOT import
 
 from __future__ import annotations
 
+import signal
+import subprocess
 import time
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from debugbridge.fix.briefing import (
@@ -39,6 +42,47 @@ from debugbridge.fix.worktree import (
     create_worktree,
     ensure_gitignore,
 )
+
+
+@dataclass
+class _FixState:
+    """Mutable state shared between the autonomous loop and signal handlers."""
+
+    claude_proc: subprocess.Popen | None = None
+    server_proc: subprocess.Popen | None = None
+    worktree_path: Path | None = None
+    did_spawn_server: bool = False
+    _handled: bool = field(default=False, repr=False)
+
+
+def _install_signal_handlers(state: _FixState) -> None:
+    """Install SIGINT (and SIGBREAK on Windows) handlers for clean shutdown.
+
+    The handler terminates the claude subprocess, shuts down the server if
+    we spawned it, preserves the worktree for inspection, and exits with
+    code 130 (standard SIGINT exit code).
+
+    Idempotent: calling the handler multiple times is a no-op after the first.
+    """
+
+    def handler(signum: int, frame: object) -> None:
+        if state._handled:
+            return
+        state._handled = True
+        if state.claude_proc and state.claude_proc.poll() is None:
+            state.claude_proc.terminate()
+            try:
+                state.claude_proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                state.claude_proc.kill()
+        if state.did_spawn_server and state.server_proc:
+            shutdown_server(state.server_proc)
+        # Worktree preserved intentionally for inspection
+        raise SystemExit(130)
+
+    signal.signal(signal.SIGINT, handler)
+    if hasattr(signal, "SIGBREAK"):
+        signal.signal(signal.SIGBREAK, handler)
 
 
 def run_handoff(
@@ -147,6 +191,13 @@ def run_autonomous(
     # 2. Server
     server_proc = ensure_server_running(host, port)
 
+    # Signal handler state — tracks subprocesses for clean shutdown
+    state = _FixState(
+        server_proc=server_proc,
+        did_spawn_server=server_proc is not None,
+    )
+    _install_signal_handlers(state)
+
     try:
         # 3. Capture
         capture = capture_crash(pid, mcp_url, conn_str)
@@ -164,6 +215,7 @@ def run_autonomous(
 
         # 6. Worktree
         worktree = create_worktree(repo, crash_hash)
+        state.worktree_path = worktree
 
         # Copy briefing into worktree so claude can read it via @path
         wt_briefing = worktree / ".debugbridge" / "briefings" / f"crash-{crash_hash}.md"

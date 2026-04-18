@@ -505,3 +505,85 @@ def test_auto_loop_test_failure_triggers_retry(
     # Second attempt should have seen retry feedback about test failure
     assert len(briefing_snapshots) >= 2
     assert "tests failed" in briefing_snapshots[1].lower()
+
+
+# ---------------------------------------------------------------------------
+# Signal handler tests (task 2a.3.8)
+# ---------------------------------------------------------------------------
+
+
+def test_sigint_handler_terminates_claude_and_preserves_worktree(
+    tmp_path: Path,
+) -> None:
+    """Signal handler terminates claude subprocess and preserves worktree."""
+    from unittest.mock import MagicMock
+
+    from debugbridge.fix.dispatcher import _FixState, _install_signal_handlers
+
+    # Create a fake worktree directory
+    wt = tmp_path / "wt-test"
+    wt.mkdir()
+
+    # Create a mock claude process
+    mock_claude = MagicMock()
+    mock_claude.poll.return_value = None  # still running
+    mock_claude.wait.return_value = 0
+
+    state = _FixState(
+        claude_proc=mock_claude,
+        server_proc=None,
+        worktree_path=wt,
+        did_spawn_server=False,
+    )
+
+    _install_signal_handlers(state)
+
+    # Call the handler directly (simulating SIGINT)
+    import signal
+
+    handler = signal.getsignal(signal.SIGINT)
+    with pytest.raises(SystemExit) as exc_info:
+        handler(signal.SIGINT, None)
+
+    # Claude process was terminated
+    assert mock_claude.terminate.called
+
+    # Worktree is preserved (not deleted)
+    assert wt.exists()
+
+    # Exit code 130 (standard SIGINT)
+    assert exc_info.value.code == 130
+
+
+def test_sigint_handler_is_idempotent(
+    tmp_path: Path,
+) -> None:
+    """Calling the handler twice should not double-terminate."""
+    from unittest.mock import MagicMock
+
+    from debugbridge.fix.dispatcher import _FixState, _install_signal_handlers
+
+    mock_claude = MagicMock()
+    mock_claude.poll.return_value = None
+    mock_claude.wait.return_value = 0
+
+    state = _FixState(
+        claude_proc=mock_claude,
+        worktree_path=tmp_path,
+    )
+
+    _install_signal_handlers(state)
+
+    import signal
+
+    handler = signal.getsignal(signal.SIGINT)
+
+    # First call raises SystemExit
+    with pytest.raises(SystemExit):
+        handler(signal.SIGINT, None)
+
+    # Second call is a no-op (no SystemExit, no double-terminate)
+    handler(signal.SIGINT, None)
+
+    # terminate should have been called exactly once
+    assert mock_claude.terminate.call_count == 1
