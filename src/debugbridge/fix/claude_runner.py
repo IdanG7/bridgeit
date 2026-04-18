@@ -25,6 +25,7 @@ __all__ = [
     "_build_claude_run_result",
     "_parse_claude_json",
     "run_claude_headless",
+    "run_claude_interactive",
     "write_mcp_config",
     "write_system_append",
 ]
@@ -95,7 +96,26 @@ def write_system_append(target_dir: Path) -> Path:
     return out
 
 
-# TODO(task 2a.2.2): add run_claude_interactive(repo, briefing_rel, mcp_config_path) -> int
+def run_claude_interactive(repo: Path, briefing_rel: Path, mcp_config_path: Path) -> int:
+    """Launch claude interactively with the crash briefing pre-loaded.
+
+    Constructs a CLI invocation matching RESEARCH.md section 2.4 + 2.1:
+    ``claude --mcp-config <path> --strict-mcp-config <positional message>``.
+
+    ``--strict-mcp-config`` prevents user-level MCP servers from interfering
+    (Pitfall 7 mitigation). The positional message directs Claude to read the
+    briefing file via ``@<path>`` syntax.
+
+    Returns the subprocess exit code (0 = success).
+    """
+    cmd = [
+        "claude",
+        "--mcp-config",
+        str(mcp_config_path),
+        "--strict-mcp-config",
+        f"I've just captured a crash. Read @{briefing_rel.as_posix()} and propose a fix.",
+    ]
+    return subprocess.run(cmd, cwd=str(repo)).returncode
 
 
 def _parse_claude_json(stdout: str) -> dict | None:
