@@ -542,6 +542,7 @@ def test_sigint_handler_terminates_claude_and_preserves_worktree(
     import signal
 
     handler = signal.getsignal(signal.SIGINT)
+    assert callable(handler)
     with pytest.raises(SystemExit) as exc_info:
         handler(signal.SIGINT, None)
 
@@ -577,6 +578,7 @@ def test_sigint_handler_is_idempotent(
     import signal
 
     handler = signal.getsignal(signal.SIGINT)
+    assert callable(handler)
 
     # First call raises SystemExit
     with pytest.raises(SystemExit):
