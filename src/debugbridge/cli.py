@@ -141,6 +141,64 @@ def doctor() -> None:
 
 
 @app.command()
+def fix(
+    pid: int = typer.Option(..., "--pid", help="PID of the target process."),
+    repo: str = typer.Option(".", "--repo", help="Path to the git repository."),
+    conn_str: str | None = typer.Option(None, "--conn-str", help="Remote dbgsrv connection string."),
+    build_cmd: str | None = typer.Option(None, "--build-cmd", help="Build command to validate fix."),
+    test_cmd: str | None = typer.Option(None, "--test-cmd", help="Test command to validate fix."),
+    auto: bool = typer.Option(False, "--auto", help="Run autonomously (headless claude -p)."),
+    host: str = typer.Option("127.0.0.1", "--host", help="MCP server host."),
+    port: int = typer.Option(8585, "--port", help="MCP server port."),
+    model: str = typer.Option("sonnet", "--model", help="Claude model for autonomous mode."),
+    max_attempts: int = typer.Option(3, "--max-attempts", help="Max fix attempts in autonomous mode."),
+) -> None:
+    """Run the crash-fix agent against a live process."""
+    import shutil
+    from pathlib import Path
+
+    from debugbridge.fix.worktree import is_git_repo
+
+    repo_path = Path(repo).resolve()
+
+    if not repo_path.exists() or not is_git_repo(repo_path):
+        console.print(f"[red]Error:[/red] {repo_path} is not a git repository.")
+        raise typer.Exit(code=1)
+
+    if not shutil.which("claude"):
+        console.print("[red]Error:[/red] claude CLI not found on PATH. Run `debugbridge doctor`.")
+        raise typer.Exit(code=1)
+
+    # Lazy import -- don't load fix/ until actually needed to preserve
+    # the Phase 1 invariant that cli.py loads without pybag.
+    from debugbridge.fix.dispatcher import run_autonomous, run_handoff
+
+    if auto:
+        result = run_autonomous(
+            repo=repo_path,
+            pid=pid,
+            host=host,
+            port=port,
+            build_cmd=build_cmd,
+            test_cmd=test_cmd,
+            model=model,
+            max_attempts=max_attempts,
+            conn_str=conn_str,
+        )
+    else:
+        result = run_handoff(
+            repo=repo_path,
+            pid=pid,
+            host=host,
+            port=port,
+            conn_str=conn_str,
+        )
+
+    if not result.ok:
+        raise typer.Exit(code=1)
+
+
+@app.command()
 def version() -> None:
     """Print DebugBridge's version and exit."""
     console.print(f"debugbridge {__version__}")
