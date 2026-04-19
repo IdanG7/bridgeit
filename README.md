@@ -1,45 +1,113 @@
 # DebugBridge
 
-Remote crash capture MCP server for native Windows applications. Exposes live DbgEng debugger state (call stack, exception info, threads, locals) from local or remote processes to MCP-compatible AI clients like Claude Code, Cursor, and Claude Desktop.
+Remote crash capture for Claude Code, Cursor, and Claude Desktop. Expose live Windows debugger state as MCP tools, and run an autonomous AI fix-loop on remote crashes.
 
-> **Status:** Phase 2a (Fix-loop MVP) -- in active development. Not yet published to PyPI.
+[![CI](https://github.com/IdanG7/bridgeit/actions/workflows/ci.yml/badge.svg)](https://github.com/IdanG7/bridgeit/actions/workflows/ci.yml)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)
+![Platform: Windows 10/11](https://img.shields.io/badge/platform-Windows%2010%2F11-informational)
 
-## Why
+> **Alpha** — API stable, not yet on PyPI (clone to install). MIT-licensed. Windows 10/11 only for now; Linux/macOS/Unity are on the roadmap (Phase 3).
+
+[![Watch the 60s demo](docs/demo-thumb.png)](https://youtu.be/XXXX)
+
+## Why DebugBridge
 
 When a C/C++ application crashes on a remote test machine, no AI coding tool (Claude Code, Cursor, Copilot) can see the process. Developers copy-paste stack traces by hand, losing 30–60 minutes per crash. DebugBridge runs an MCP server on the dev machine that attaches to the remote process via Windows's built-in `dbgsrv.exe`, exposing debugger state as MCP tools. The AI can now read the crash directly.
 
-## Install
+No other tool combines remote debugger capture, MCP exposure, and an autonomous repair agent in one flow.
 
-```bash
-uv pip install debugbridge   # not yet on PyPI; clone and `uv sync` for now
+## Architecture
+
+```text
+    TEST MACHINE                              DEV MACHINE
+┌──────────────────┐                    ┌─────────────────────────────┐
+│  Your C/C++ app  │                    │   debugbridge MCP server    │
+│  (crashes)       │ ─── network ────── │   (Python + pybag + MCP)    │
+│  dbgsrv.exe      │                    │                             │
+│  (one command)   │                    │   Streamable HTTP on :8585  │
+└──────────────────┘                    │        │                    │
+                                        │        ▼                    │
+                                        │   Claude Code / Cursor      │
+                                        │                             │
+                                        │   debugbridge fix agent     │
+                                        │   (crash → patch → PR)      │
+                                        └─────────────────────────────┘
 ```
 
-**Prerequisite:** [Windows Debugging Tools](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/) (part of the Windows SDK). Run `debugbridge doctor` to verify.
+## Prerequisites
+
+- Windows 10/11 x64 (dev machine and test machine)
+- Python >= 3.11
+- [uv](https://docs.astral.sh/uv/) >= 0.5
+- [Windows Debugging Tools](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/) (part of the Windows SDK) — required on the dev machine for pybag
+- git >= 2.20
+- [`claude` CLI](https://docs.claude.com/en/docs/claude-code/getting-started) on PATH (required for the fix-loop agent)
+
+Run `uv run debugbridge doctor` after installation to verify everything is in place.
+
+## Install
+
+Install from source (PyPI publish is tracked in the roadmap for Phase 2c):
+
+```bash
+git clone https://github.com/IdanG7/bridgeit.git
+cd bridgeit
+uv sync
+uv run debugbridge doctor   # verifies prerequisites
+```
 
 ## Quick start
+
+On a fresh Windows 10/11 box, after installing prerequisites:
 
 1. **On the test machine** — start the debug server:
    ```powershell
    dbgsrv.exe -t tcp:port=5555
    ```
 
-2. **On the dev machine** — start DebugBridge:
+2. **On the dev machine** — verify your setup, then start DebugBridge:
    ```bash
-   debugbridge serve --port 8585
+   uv run debugbridge doctor
+   uv run debugbridge serve --port 8585
    ```
 
-3. **In your MCP client** — register DebugBridge:
-   - Claude Desktop / Code → `%APPDATA%\Claude\claude_desktop_config.json`:
-     ```json
-     {"mcpServers": {"debugbridge": {"url": "http://localhost:8585/mcp"}}}
-     ```
-   - Cursor → `.cursor/mcp.json`:
-     ```json
-     {"mcpServers": {"debugbridge": {"url": "http://localhost:8585/mcp"}}}
-     ```
+3. **In your MCP client** — register DebugBridge (see configs below).
 
 4. Ask the AI to attach and diagnose:
    > "Attach to `myapp.exe` on `tcp:server=192.168.1.10,port=5555` and tell me why it crashed."
+
+## MCP client configuration
+
+### Claude Code
+
+Register the server with the Claude Code CLI:
+
+```bash
+claude mcp add debugbridge --transport http http://localhost:8585/mcp
+```
+
+If the CLI syntax on your version differs, you can use the equivalent JSON config shape:
+
+```json
+{"mcpServers": {"debugbridge": {"url": "http://localhost:8585/mcp"}}}
+```
+
+### Claude Desktop
+
+Edit `%APPDATA%\Claude\claude_desktop_config.json`:
+
+```json
+{"mcpServers": {"debugbridge": {"url": "http://localhost:8585/mcp"}}}
+```
+
+### Cursor
+
+Edit `.cursor/mcp.json` in your project (or the global Cursor config):
+
+```json
+{"mcpServers": {"debugbridge": {"url": "http://localhost:8585/mcp"}}}
+```
 
 ## Tools exposed
 
@@ -53,16 +121,16 @@ uv pip install debugbridge   # not yet on PyPI; clone and `uv sync` for now
 | `set_breakpoint` | Set a breakpoint at `file:line` or `module!symbol` |
 | `step_next` | Step over one line |
 | `continue_execution` | Resume the process |
+| `detach_process` | Releases the target process without stopping the server |
 
-## Fix-loop agent (Phase 2a)
+## Fix-loop agent
 
-Autonomous crash-fix pipeline. Captures crash state via MCP, generates a fix
-with Claude Code, validates with your build command, and emits a `.patch` file.
+Autonomous crash-fix pipeline. Captures crash state via MCP, generates a fix with Claude Code, validates with your build command, and emits a `.patch` file.
 
 ### Hand-off mode (interactive)
 
 ```bash
-debugbridge fix --pid <PID> --repo D:/myapp
+uv run debugbridge fix --pid <PID> --repo D:/myapp
 ```
 
 Opens an interactive Claude Code session with the crash briefing preloaded.
@@ -70,7 +138,7 @@ Opens an interactive Claude Code session with the crash briefing preloaded.
 ### Autonomous mode
 
 ```bash
-debugbridge fix --pid <PID> --repo D:/myapp \
+uv run debugbridge fix --pid <PID> --repo D:/myapp \
     --auto \
     --build-cmd "cmake --build build --config Debug" \
     --test-cmd "ctest" \
@@ -79,22 +147,38 @@ debugbridge fix --pid <PID> --repo D:/myapp \
 
 Runs headless. Produces `.debugbridge/patches/crash-<hash>.patch` on success.
 
-**Prerequisites:** `claude` CLI on PATH. Run `debugbridge doctor` to verify.
+> Hand-off mode is the default; `--auto` runs headless and should only be used after you've dogfooded the loop.
+
+## How it compares
+
+Existing tools cover pieces of the crash-fix workflow, but none cover all three:
+
+- **CrashReporter / WER / Breakpad** — capture crash dumps, but there's no live debugger, no MCP surface, and no repair step.
+- **Sentry / Rollbar / Bugsnag** — telemetry and aggregation after the fact, not a live debugger session you can step through.
+- **Claude Code / Cursor on your dev box** — excellent at editing code, but can't see a process running on a remote test rig.
+
+DebugBridge covers all three: remote debugger capture, MCP exposure to the AI client, and an autonomous repair agent that writes patches back.
+
+## Troubleshooting
+
+- **`debugbridge doctor` reports pybag missing.** Install the [Windows Debugging Tools](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/) (part of the Windows SDK). pybag links against DbgEng.dll from that install.
+- **Symbols aren't resolved in the call stack.** Set `_NT_SYMBOL_PATH` before starting the server, e.g. `srv*C:\Symbols*https://msdl.microsoft.com/download/symbols`.
+- **Port 8585 is already in use.** Pass `--port N` to `debugbridge serve` and update the URL in your MCP client config.
+- **`claude` command not found.** Install the [Claude Code CLI](https://docs.claude.com/en/docs/claude-code/getting-started) and make sure it's on your PATH before running `debugbridge fix`.
+- **Attach fails with access denied.** Run the DebugBridge process elevated (same or higher privilege level than the target process).
 
 ## Development
 
-```bash
-git clone <this repo>
-cd BridgeIt
-uv sync --all-extras
-uv run pytest -m "not integration"  # unit tests only
-```
+For development setup, testing, and PR process, see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-Integration tests require Windows Debugging Tools installed and `PYBAG_INTEGRATION=1`:
-```powershell
-$env:PYBAG_INTEGRATION = "1"
-uv run pytest
-```
+## Links
+
+- Landing page: https://debugbridge.dev
+- [GitHub Issues](https://github.com/IdanG7/bridgeit/issues)
+- [GitHub Discussions](https://github.com/IdanG7/bridgeit/discussions)
+- [CHANGELOG](./CHANGELOG.md)
+- [CONTRIBUTING](./CONTRIBUTING.md)
+- [LICENSE](./LICENSE)
 
 ## License
 
