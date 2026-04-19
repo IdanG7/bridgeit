@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased]
+
+### Documentation
+- Rewrote README for public audience (hero, quickstart, architecture diagram, MCP client configs for Claude Code / Cursor / Claude Desktop, troubleshooting).
+- Added CONTRIBUTING.md, CODE_OF_CONDUCT.md (Contributor Covenant 2.1), SECURITY.md.
+- Added GitHub issue templates (bug report + feature request) and PR template.
+
+### Marketing
+- Landing page shipped at https://debugbridge.dev (Astro + Tailwind, hosted on Cloudflare Pages).
+- 60-second demo video recorded and uploaded (YouTube).
+- Submitted to MCP directories (see `.planning/phase-2b-public-launch/DIRECTORY_SUBMISSIONS.md` for current status — directory names will be named specifically at release time in Task 2b.F.3 based on which submissions are live).
+
+### No functional code changes in this release.
+
 ## 0.2.0 -- Fix-loop MVP (Phase 2a)
 
 ### Added
