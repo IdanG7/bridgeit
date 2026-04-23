@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions / Discussions
+    url: https://github.com/IdanG7/stackly/discussions
+    about: For open-ended questions, use Discussions instead of Issues.
+  - name: Security vulnerabilities
+    url: https://github.com/IdanG7/stackly/security/advisories/new
+    about: Report security issues privately here.
