@@ -16,9 +16,9 @@ Phase 2b is marketing plumbing, not product work. Almost every deliverable has a
 
 4. **Cloudflare Pages beats Vercel for this project.** Cloudflare: unlimited bandwidth, commercial-use-allowed free tier, and built-in Web Analytics that needs no cookie banner. Vercel's free tier is personal-use-only — commercial open-source marketing is a grey zone that triggers Pro ($20/mo). GitHub Pages would work but has no preview deploys and no built-in analytics. Recommendation: **Cloudflare Pages**.
 
-5. **Landing page source should live under `site/` in the DebugBridge repo, not a sibling repo.** A sibling repo adds a second CI, second deploy key, and a second place to search — solo-maintainer debt. The Astro project is ~30 files and builds to a `dist/` directory that Cloudflare Pages can point at via the monorepo subdirectory setting. A single-line `.gitattributes` entry keeps GitHub's language-stats bar accurate (Python, not TypeScript).
+5. **Landing page source should live under `site/` in the Stackly repo, not a sibling repo.** A sibling repo adds a second CI, second deploy key, and a second place to search — solo-maintainer debt. The Astro project is ~30 files and builds to a `dist/` directory that Cloudflare Pages can point at via the monorepo subdirectory setting. A single-line `.gitattributes` entry keeps GitHub's language-stats bar accurate (Python, not TypeScript).
 
-6. **The README rewrite is ~60% new material.** Current README is developer-internal ("clone and `uv sync`"). Public version needs: stranger-friendly hero, animated demo GIF, explicit prerequisite list with version floors, MCP-client config snippets for three clients (Claude Code, Cursor, Claude Desktop), a "Why DebugBridge" competitive-wedge section, and a troubleshooting section that reflects actual user-facing errors. The tools table and dev-setup sections can be preserved roughly as-is.
+6. **The README rewrite is ~60% new material.** Current README is developer-internal ("clone and `uv sync`"). Public version needs: stranger-friendly hero, animated demo GIF, explicit prerequisite list with version floors, MCP-client config snippets for three clients (Claude Code, Cursor, Claude Desktop), a "Why Stackly" competitive-wedge section, and a troubleshooting section that reflects actual user-facing errors. The tools table and dev-setup sections can be preserved roughly as-is.
 
 7. **60-second demo video realistically takes 6–10 hours end-to-end for a first-timer.** Breakdown: script (1h), setup & rehearsal (1h), recording 3-5 takes (1-2h), editing (2-3h), caption generation + thumbnail (1h), revision pass (1h). Use OBS Studio for capture (MKV → remux to MP4), Descript for edit-by-transcript + auto-captions, YouTube for primary host (unlisted then public), embed via `<iframe>` on the landing page. Do not self-host the MP4 — it tanks Lighthouse Performance.
 
@@ -26,7 +26,7 @@ Phase 2b is marketing plumbing, not product work. Almost every deliverable has a
 
 9. **Open-source scaffolding files are mostly boilerplate.** Contributor Covenant 2.1 is a copy-paste with one email substitution. SECURITY.md gets a 10-line responsible-disclosure template. CONTRIBUTING.md is the only one that requires real authorial work (dev setup, test commands, PR conventions). GitHub issue-forms YAML is the current best practice — strictly better than markdown templates for structured fields.
 
-10. **Most deliverables are parallelizable.** The only hard sequences are: (a) the domain must be registered before anyone else grabs `debugbridge.dev`, (b) the video must exist before the landing page can embed it and before the directory submissions can link to it, (c) the landing page URL must exist before the directory submissions include it, (d) the launch-post drafts should reference the live landing page URL. Everything else (README, open-source scaffolding, GitHub metadata, launch-post drafts in stub form) can run in parallel.
+10. **Most deliverables are parallelizable.** The only hard sequences are: (a) the domain must be registered before anyone else grabs `stackly.dev`, (b) the video must exist before the landing page can embed it and before the directory submissions can link to it, (c) the landing page URL must exist before the directory submissions include it, (d) the launch-post drafts should reference the live landing page URL. Everything else (README, open-source scaffolding, GitHub metadata, launch-post drafts in stub form) can run in parallel.
 
 **Primary recommendation:** Build Phase 2b as four parallelizable tracks, merged at the end: **Track A (content)** — README rewrite + demo script + open-source scaffolding; **Track B (infra)** — domain registration + landing page skeleton + Cloudflare Pages setup; **Track C (video)** — demo recording + editing + YouTube upload; **Track D (distribution)** — directory submission prep + launch-post drafts. Tracks A, B, D can all start immediately. Track C waits only on the demo script from A. Landing page integration and directory submissions are the final merge points.
 
@@ -44,7 +44,7 @@ Phase 2b is marketing plumbing, not product work. Almost every deliverable has a
 | `astro-seo` | latest | Open Graph / Twitter Card / canonical meta tags | Idiomatic way to set per-page meta in Astro; avoids hand-rolling 15 `<meta>` tags in a `<Layout>` slot. |
 | Cloudflare Pages | n/a (hosted) | Static hosting, CDN, TLS, preview deploys | Unlimited bandwidth on free tier, commercial-use allowed, built-in Web Analytics, automatic preview deploys per PR, custom domain free. |
 | Cloudflare Web Analytics | n/a (hosted) | Privacy-respecting analytics | No cookie banner required, no GDPR consent flow, free on Cloudflare Pages, built-in Core Web Vitals. |
-| Cloudflare Registrar | n/a (hosted) | Domain registration (`debugbridge.dev`) | At-cost pricing (≈$10/year for `.dev`), free WHOIS privacy, DNS auto-configured for Pages. |
+| Cloudflare Registrar | n/a (hosted) | Domain registration (`stackly.dev`) | At-cost pricing (≈$10/year for `.dev`), free WHOIS privacy, DNS auto-configured for Pages. |
 
 ### Video production
 
@@ -74,7 +74,7 @@ Phase 2b is marketing plumbing, not product work. Almost every deliverable has a
 | Astro | Next.js 15 static export | **Rejected.** Next.js is an SSR/RSC framework bent into static mode. More deps, more build config, more JS runtime in `output: export` mode. Pure overkill for a single landing page. |
 | Astro | MkDocs Material / Docusaurus | **Rejected.** These are docs-site frameworks. Good for Phase 2c when we have a real docs surface; wrong for a marketing landing page. |
 | Astro | Hugo | Viable, but Go toolchain adds friction for a JS-ecosystem contributor. Astro wins on contributor familiarity. |
-| Cloudflare Pages | Vercel | **Rejected** for DebugBridge. Vercel's free tier is "personal, non-commercial" per ToS — open-source marketing with a planned paid tier (Phase 4) is a grey area. Cloudflare Pages has no such restriction, plus unlimited bandwidth. |
+| Cloudflare Pages | Vercel | **Rejected** for Stackly. Vercel's free tier is "personal, non-commercial" per ToS — open-source marketing with a planned paid tier (Phase 4) is a grey area. Cloudflare Pages has no such restriction, plus unlimited bandwidth. |
 | Cloudflare Pages | GitHub Pages | Viable fallback. Missing: preview deploys per PR, server-side redirects/headers, built-in analytics. Works for a truly minimal site but forecloses the above upgrades. |
 | Cloudflare Pages | Netlify | Comparable to Vercel. Same bandwidth limits (100 GB). Not differentiated enough from Cloudflare Pages to prefer. |
 | Descript | DaVinci Resolve (free) | Rejected for 2b. DaVinci is professional-grade (Hollywood color, Fairlight audio) and overkill for a 60s talking-head-over-code demo. 10x steeper learning curve than Descript. Revisit if we ever need cinematic B-roll. |
@@ -85,7 +85,7 @@ Phase 2b is marketing plumbing, not product work. Almost every deliverable has a
 **Installation (landing page):**
 
 ```bash
-# Assuming site/ subdirectory in DebugBridge repo
+# Assuming site/ subdirectory in Stackly repo
 cd site
 npm create astro@latest . -- --template minimal --typescript strict --no-install --no-git
 npm install
@@ -94,7 +94,7 @@ npx astro add sitemap        # installs @astrojs/sitemap
 npm install astro-seo
 ```
 
-Cloudflare Pages is configured via the Cloudflare dashboard (no local CLI required); point it at `github.com/IdanG7/bridgeit`, set build command `cd site && npm install && npm run build`, set output directory `site/dist`.
+Cloudflare Pages is configured via the Cloudflare dashboard (no local CLI required); point it at `github.com/IdanG7/stackly`, set build command `cd site && npm install && npm run build`, set output directory `site/dist`.
 
 ---
 
@@ -182,7 +182,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).toString();
       canonical={canonicalUrl}
       openGraph={{
         basic: { title, type: 'website', image, url: canonicalUrl },
-        optional: { description, siteName: 'DebugBridge' }
+        optional: { description, siteName: 'Stackly' }
       }}
       twitter={{
         card: 'summary_large_image',
@@ -203,9 +203,9 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).toString();
 
 ## 2. Hosting + Domain Mechanics
 
-### Domain registration — `debugbridge.dev`
+### Domain registration — `stackly.dev`
 
-**Current availability:** Unconfirmed by this research. WHOIS lookup tooling is not available in the research environment and no reliable public WHOIS snapshot surfaced for this specific domain. **Plan action:** first planner task is `whois debugbridge.dev` (or check at `https://www.namecheap.com/domains/registration/results/?domain=debugbridge.dev`). If taken, fall back candidates: `debugbridge.app`, `debugbridge.io` (expensive), `getdebugbridge.dev`, `usedebugbridge.dev`.
+**Current availability:** Unconfirmed by this research. WHOIS lookup tooling is not available in the research environment and no reliable public WHOIS snapshot surfaced for this specific domain. **Plan action:** first planner task is `whois stackly.dev` (or check at `https://www.namecheap.com/domains/registration/results/?domain=stackly.dev`). If taken, fall back candidates: `stackly.app`, `stackly.io` (expensive), `getstackly.dev`, `usestackly.dev`.
 
 **Register at Cloudflare Registrar** (not Namecheap/Porkbun), because:
 - At-cost pricing (≈$10–12/year for `.dev`, no markup).
@@ -233,7 +233,7 @@ Sources:
 | Commercial use on free tier | ✅ | ⚠️ ToS says personal only | ✅ |
 | Deploy source | Git (GitHub/GitLab) or wrangler | Git or CLI | Git or Actions |
 
-**Recommendation: Cloudflare Pages.** The commercial-use clause is the dealbreaker for Vercel — DebugBridge has a planned paid tier (Phase 4), which makes the project commercial even pre-revenue.
+**Recommendation: Cloudflare Pages.** The commercial-use clause is the dealbreaker for Vercel — Stackly has a planned paid tier (Phase 4), which makes the project commercial even pre-revenue.
 
 Sources:
 - [Cloudflare Pages vs Vercel vs Netlify (hosting-ranked.com, 2026)](https://hosting-ranked.com/cloudflare-pages-vs-vercel-vs-netlify/) (MEDIUM)
@@ -242,8 +242,8 @@ Sources:
 
 ### Cloudflare Pages deploy — exact steps
 
-1. Push `site/` directory to `main` on `IdanG7/bridgeit`.
-2. Cloudflare dashboard → Pages → "Create a project" → "Connect to Git" → select `bridgeit` repo.
+1. Push `site/` directory to `main` on `IdanG7/stackly`.
+2. Cloudflare dashboard → Pages → "Create a project" → "Connect to Git" → select `stackly` repo.
 3. Build settings:
    - **Framework preset:** Astro
    - **Build command:** `cd site && npm install && npm run build`
@@ -251,11 +251,11 @@ Sources:
    - **Root directory (advanced):** leave blank
    - **Environment variables:** none needed for 2b
 4. Click "Save and Deploy". First build: ~2 min.
-5. After first successful deploy → Custom domains → "Set up a custom domain" → enter `debugbridge.dev` and `www.debugbridge.dev`. If domain registered via Cloudflare Registrar, DNS is auto-configured; otherwise add CNAME records pointing at `<project>.pages.dev`.
+5. After first successful deploy → Custom domains → "Set up a custom domain" → enter `stackly.dev` and `www.stackly.dev`. If domain registered via Cloudflare Registrar, DNS is auto-configured; otherwise add CNAME records pointing at `<project>.pages.dev`.
 6. Enable Web Analytics: Cloudflare dashboard → Analytics & Logs → Web Analytics → "Add a site" → select the pages.dev or custom domain. Copy the one-line beacon script into `BaseLayout.astro`.
-7. Submit sitemap to Google Search Console: `search.google.com/search-console` → add property → verify via DNS TXT record (Cloudflare auto-handles this) → Sitemaps → submit `https://debugbridge.dev/sitemap-index.xml`.
+7. Submit sitemap to Google Search Console: `search.google.com/search-console` → add property → verify via DNS TXT record (Cloudflare auto-handles this) → Sitemaps → submit `https://stackly.dev/sitemap-index.xml`.
 
-Preview deploy URLs: every PR gets a unique `<branch>-<hash>.bridgeit.pages.dev` URL automatically. Use this to preview README/landing-page changes before merging.
+Preview deploy URLs: every PR gets a unique `<branch>-<hash>.stackly.pages.dev` URL automatically. Use this to preview README/landing-page changes before merging.
 
 ---
 
@@ -274,11 +274,11 @@ From reading the live landing pages of Bun, Biome, uv, and mise, the invariant s
 | How it works | Below value grid | 3–5 step diagram OR animated flow | mise: 3-step install → use → activate |
 | Code / usage example | Below how-it-works | Tabbed or stacked code blocks showing real usage | Bun: 8 code examples (HTTP, WebSocket, SQL, etc.); Biome: formatted code before/after |
 | Benchmarks / comparison | Mid-page | "Vs. alternative" metrics, charts, or feature matrix | Bun: bar charts vs Node/Deno; Biome: 35x faster than Prettier |
-| Client/integration setup | Below benchmarks | How to wire the tool into your existing stack | (DebugBridge-specific: MCP client config snippets for Claude Code / Cursor / Claude Desktop, tabbed) |
-| Who it's for / use cases | Lower third | 3–5 user-type cards with pain-point framing | (DebugBridge: game studios, embedded, desktop app devs, enterprise C++, DevOps/SRE) |
+| Client/integration setup | Below benchmarks | How to wire the tool into your existing stack | (Stackly-specific: MCP client config snippets for Claude Code / Cursor / Claude Desktop, tabbed) |
+| Who it's for / use cases | Lower third | 3–5 user-type cards with pain-point framing | (Stackly: game studios, embedded, desktop app devs, enterprise C++, DevOps/SRE) |
 | CTA repeat + footer | Bottom | Install command repeated + link to docs/GitHub/Discord + license + maintainer attribution | All four reference sites do this |
 
-### DebugBridge-specific section map
+### Stackly-specific section map
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -290,13 +290,13 @@ From reading the live landing pages of Bun, Biome, uv, and mise, the invariant s
 │ DEMO VIDEO EMBED (YouTube iframe, 16:9)                     │
 ├─────────────────────────────────────────────────────────────┤
 │ 3-STEP "HOW IT WORKS"                                        │
-│   ① dbgsrv.exe on test box  ② debugbridge serve on dev box │
+│   ① dbgsrv.exe on test box  ② stackly serve on dev box │
 │   ③ MCP client sees the crash                                │
 ├─────────────────────────────────────────────────────────────┤
 │ WHY DEBUGBRIDGE (competitive wedge)                          │
 │   "No other tool combines remote debugger state + MCP +      │
 │    autonomous repair."                                       │
-│   [Comparison grid: CrashReporter vs. DebugBridge etc.]      │
+│   [Comparison grid: CrashReporter vs. Stackly etc.]      │
 ├─────────────────────────────────────────────────────────────┤
 │ MCP CLIENT SETUP (tabbed: Claude Code / Cursor / Desktop)    │
 ├─────────────────────────────────────────────────────────────┤
@@ -331,17 +331,17 @@ Current README (repo root, ~100 lines) is developer-internal. Here's the concret
 | Status callout ("Phase 2a -- in active development") | **REPLACE** | "Alpha — API stable, not yet on PyPI (clone to install). MIT-licensed." + badges: MIT, Python 3.11+, Windows 10/11 x64, CI status. |
 | "Why" paragraph | **KEEP** (lightly edited) | Current "30–60 minutes per crash" framing is excellent. Add one sentence about MCP + autonomous repair combination (the wedge). |
 | (NEW) Demo GIF/video | **ADD** | `![demo](docs/demo.gif)` — 5–10MB GIF rendered from the 60s video (ffmpeg: `ffmpeg -i demo.mp4 -r 12 -vf scale=800:-1 demo.gif`) OR embed the YouTube link as `[![Watch the demo](docs/demo-thumb.png)](https://youtu.be/XXXX)`. |
-| Install (current: `uv pip install debugbridge # not yet on PyPI`) | **REWRITE** | Full "from source" path: git clone + uv sync + doctor + serve. Be honest: "PyPI publish is Phase 2c — for now, install from source." Link to the 2c milestone issue. |
+| Install (current: `uv pip install stackly # not yet on PyPI`) | **REWRITE** | Full "from source" path: git clone + uv sync + doctor + serve. Be honest: "PyPI publish is Phase 2c — for now, install from source." Link to the 2c milestone issue. |
 | Prerequisite callout | **EXPAND** | Explicit version floors: Windows 10/11 x64, Python ≥3.11, uv ≥0.5, Windows Debugging Tools (link to installer), git ≥2.20. |
 | (NEW) "Architecture" diagram | **ADD** | Copy the ASCII diagram from PROJECT.md (TEST MACHINE ↔ DEV MACHINE) into the README. |
-| Quick start (4 steps) | **REWRITE** | Current skeleton is good but needs stranger context. Add: "On a fresh Windows 10/11 box, after installing prerequisites:" + explicit `uv run debugbridge doctor` before `serve`. |
-| MCP client config snippets (Claude Desktop, Cursor) | **EXPAND** | Add Claude Code as a third client: `claude mcp add debugbridge http://localhost:8585/mcp` (or equivalent config file). Show the exact command for each. |
+| Quick start (4 steps) | **REWRITE** | Current skeleton is good but needs stranger context. Add: "On a fresh Windows 10/11 box, after installing prerequisites:" + explicit `uv run stackly doctor` before `serve`. |
+| MCP client config snippets (Claude Desktop, Cursor) | **EXPAND** | Add Claude Code as a third client: `claude mcp add stackly http://localhost:8585/mcp` (or equivalent config file). Show the exact command for each. |
 | Tools table (8 tools) | **KEEP** | Current table is good for a public README. |
 | Fix-loop agent section | **KEEP** (minor edits) | Currently good. Add a callout: "Hand-off mode is the default — it launches Claude Code with the crash preloaded. Use `--auto` only after you've trusted the loop." |
 | Development section | **KEEP + MOVE** | Move to a dedicated CONTRIBUTING.md; leave a 3-line "For contributors, see CONTRIBUTING.md" in README. |
 | License | **KEEP** | Unchanged. |
-| (NEW) "Why DebugBridge" competitive wedge section | **ADD** | Short section explaining the 3-way combo: remote debug capture + MCP exposure + autonomous repair. Name alternatives that do *one* of those things (CrashReporter, Sentry, manual Claude Code). |
-| (NEW) Troubleshooting | **ADD** | Pointers to `debugbridge doctor`, common errors (pybag not found, symbols missing, port in use). 5 FAQ items tops. |
+| (NEW) "Why Stackly" competitive wedge section | **ADD** | Short section explaining the 3-way combo: remote debug capture + MCP exposure + autonomous repair. Name alternatives that do *one* of those things (CrashReporter, Sentry, manual Claude Code). |
+| (NEW) Troubleshooting | **ADD** | Pointers to `stackly doctor`, common errors (pybag not found, symbols missing, port in use). 5 FAQ items tops. |
 | (NEW) Links footer | **ADD** | Landing page, GitHub issues, Discussions, CHANGELOG, CONTRIBUTING, LICENSE. |
 
 **Net length estimate:** current README is ~100 lines; public version will be ~200–250 lines. Roughly 60% new material.
@@ -356,10 +356,10 @@ Current README (repo root, ~100 lines) is developer-internal. Here's the concret
 |------|------|---------|------------------------------------------|
 | Hook | 0:00–0:05 | Crash on screen. Visual pain point. No voiceover yet, or single sentence. | [crash_app.exe window with red error dialog] "Your C++ app crashed on a test machine. What now?" |
 | Problem | 0:05–0:15 | The manual loop: walk over, read stack, paste, paste, paste. Framed as lost time. | "You walk over, read the stack, copy it into Slack, paste it into Claude, write a fix… 30 minutes gone. Multiply by 5 crashes a day." |
-| Solution setup | 0:15–0:25 | Show the command. `debugbridge fix --pid <crash_app.exe> --repo .` | "DebugBridge flips this. One command." [terminal: `debugbridge fix --pid 4892 --repo .`] |
+| Solution setup | 0:15–0:25 | Show the command. `stackly fix --pid <crash_app.exe> --repo .` | "Stackly flips this. One command." [terminal: `stackly fix --pid 4892 --repo .`] |
 | Solution — live capture | 0:25–0:40 | Terminal shows briefing generation. Then Claude Code opens with crash preloaded. | [terminal output: "Capturing crash… 47 stack frames… 12 locals… Launching Claude Code…"] |
 | Solution — AI diagnosis | 0:40–0:50 | Claude Code's response identifies the bug (null deref on `render_target`). Shows a proposed patch. | [Claude Code panel: "Null dereference at `render_target` in `draw.cpp:127`. Proposed fix:" → patch preview] |
-| CTA | 0:50–1:00 | URL on screen, one spoken line. Focus on where to go. | "Works with Claude Code, Cursor, and Claude Desktop. Install from GitHub. **debugbridge.dev**." [full-screen URL + GitHub logo] |
+| CTA | 0:50–1:00 | URL on screen, one spoken line. Focus on where to go. | "Works with Claude Code, Cursor, and Claude Desktop. Install from GitHub. **stackly.dev**." [full-screen URL + GitHub logo] |
 
 Timing checkpoints: 0:05 hook lands, 0:25 command visible, 0:50 CTA starts. Read-aloud test: script must time to 60–65s at natural pace. If it runs over 65s, cut — do not speed up.
 
@@ -450,7 +450,7 @@ This collapses the "4 directory submissions" from the ROADMAP into effectively *
 
 **Status (April 2026):** Still labeled "preview" but actively accepting submissions. Quality-gated but not restrictive.
 
-**Auth:** GitHub OAuth (for `io.github.<user>/*` namespace) or domain DNS/HTTP verification (for custom namespace like `com.debugbridge/*`).
+**Auth:** GitHub OAuth (for `io.github.<user>/*` namespace) or domain DNS/HTTP verification (for custom namespace like `com.stackly/*`).
 
 **Flow:**
 ```bash
@@ -462,19 +462,19 @@ mcp-publisher login github
 # (follows OAuth device flow, code pasted to github.com/login/device)
 
 # 3. Create server.json in the repo root (or use `mcp-publisher init`)
-# Minimal source-only server.json for DebugBridge (no PyPI yet):
+# Minimal source-only server.json for Stackly (no PyPI yet):
 cat > server.json <<'EOF'
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.idang7/debugbridge",
-  "title": "DebugBridge",
+  "name": "io.github.idang7/stackly",
+  "title": "Stackly",
   "description": "Remote crash capture MCP server for Windows native apps. Exposes live DbgEng debugger state (stack, locals, threads, exception info) to MCP clients.",
   "version": "0.2.0",
   "repository": {
-    "url": "https://github.com/IdanG7/bridgeit",
+    "url": "https://github.com/IdanG7/stackly",
     "source": "github"
   },
-  "websiteUrl": "https://debugbridge.dev"
+  "websiteUrl": "https://stackly.dev"
 }
 EOF
 
@@ -482,7 +482,7 @@ EOF
 mcp-publisher publish
 
 # 5. Verify
-curl "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.idang7/debugbridge"
+curl "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.idang7/stackly"
 ```
 
 **Accepted without PyPI:** Yes. The official schema documents the `websiteUrl` path for "servers that follow a custom installation path or are embedded in applications without standalone packages." A minimal server.json with `repository` + `websiteUrl` and no `packages[]` array is valid. **This unblocks the Phase 2c dependency.**
@@ -506,9 +506,9 @@ Sources:
 1. **CLI:**
    ```bash
    npm install -g @smithery/cli     # Node required
-   smithery mcp publish "https://<your-hosted-server>" -n IdanG7/debugbridge
+   smithery mcp publish "https://<your-hosted-server>" -n IdanG7/stackly
    ```
-   Note: Smithery's `publish` command expects a reachable URL. For a local-only server like DebugBridge, you submit the repo reference via the web form instead (option 2).
+   Note: Smithery's `publish` command expects a reachable URL. For a local-only server like Stackly, you submit the repo reference via the web form instead (option 2).
 
 2. **Web dashboard:** [smithery.ai/new](https://smithery.ai/new) → "Submit a server" → fill the form (name, description, GitHub URL, install command, transport type, example config). Smithery accepts both remote-hosted and install-from-source servers.
 
@@ -518,10 +518,10 @@ Sources:
 
 **Metadata to prepare:**
 - One-line description (≤ 120 chars)
-- Install command: `git clone https://github.com/IdanG7/bridgeit.git && cd bridgeit && uv sync`
+- Install command: `git clone https://github.com/IdanG7/stackly.git && cd stackly && uv sync`
 - Config JSON for Claude Desktop:
   ```json
-  {"mcpServers": {"debugbridge": {"url": "http://localhost:8585/mcp"}}}
+  {"mcpServers": {"stackly": {"url": "http://localhost:8585/mcp"}}}
   ```
 - Link to README, landing page, demo video
 - License: MIT
@@ -573,7 +573,7 @@ Three maintained lists: `punkpeye/awesome-mcp-servers`, `appcypher/awesome-mcp-s
 
 Contribution format (from `punkpeye/awesome-mcp-servers/CONTRIBUTING.md`):
 ```markdown
-- [IdanG7/bridgeit](https://github.com/IdanG7/bridgeit) 🎖️ - Remote crash capture for native Windows processes. Exposes DbgEng debugger state (call stack, exception info, threads, locals) to MCP clients.
+- [IdanG7/stackly](https://github.com/IdanG7/stackly) 🎖️ - Remote crash capture for native Windows processes. Exposes DbgEng debugger state (call stack, exception info, threads, locals) to MCP clients.
 ```
 
 **Approval timeline:** Varies by maintainer; `punkpeye` is reasonably active (weekly).
@@ -603,7 +603,7 @@ The GOAL.md's "at least 4 directory submissions" is easily cleared: official reg
 ### Hacker News ("Show HN")
 
 **Post format:**
-- **Title:** `Show HN: DebugBridge – Remote crash capture for Windows C++, exposed via MCP`
+- **Title:** `Show HN: Stackly – Remote crash capture for Windows C++, exposed via MCP`
   - Under 80 chars
   - Use an em-dash or colon after the name
   - Name the product and what it does in the title
@@ -636,15 +636,15 @@ Sources:
 
 **Important:** `r/programming` has strict self-promotion norms and bans outright product plugs. `r/cpp` is much friendlier to tool releases; `r/gamedev` has a weekly "Feedback Friday" thread which is the only place self-promotion is welcome.
 
-**`r/cpp`** (most welcoming for DebugBridge):
+**`r/cpp`** (most welcoming for Stackly):
 - Post format: link + body text. OP body should walk through a technical decision (e.g., "we wrote a pybag/DbgEng wrapper to expose remote crashes to MCP; here's why we used WinDbg command parsing instead of the native COM APIs"). Technical war-story sells better than a pitch.
 - Link target: GitHub (not landing page).
 - Flair: post flair required; pick "Show and Tell" or "Tooling" (verify in sidebar at post time — rules evolve).
-- Title: "DebugBridge: Remote DbgEng capture exposed to Claude Code via MCP (open source)"
+- Title: "Stackly: Remote DbgEng capture exposed to Claude Code via MCP (open source)"
 
 **`r/programming`** (caution — high rejection risk):
-- Post only if the project is *unusually* technically interesting (DebugBridge qualifies — MCP + remote debugger COM wrappers + autonomous agents is non-trivial).
-- Do NOT post a "launch" — post the technical write-up. E.g., link to a blog post titled "How to expose a remote Windows debugger to an AI via MCP" that happens to mention DebugBridge. Landing page/GitHub gets mentioned in paragraph 3, not paragraph 1.
+- Post only if the project is *unusually* technically interesting (Stackly qualifies — MCP + remote debugger COM wrappers + autonomous agents is non-trivial).
+- Do NOT post a "launch" — post the technical write-up. E.g., link to a blog post titled "How to expose a remote Windows debugger to an AI via MCP" that happens to mention Stackly. Landing page/GitHub gets mentioned in paragraph 3, not paragraph 1.
 - Fallback if no blog post ready: skip r/programming in Phase 2b and revisit in 2c.
 
 **`r/gamedev`** (relevant per PROJECT.md's game-studio target segment):
@@ -660,10 +660,10 @@ Sources:
 
 **Thread structure (5–8 tweets):**
 
-1. **Hook tweet + media:** 1 sentence problem statement + demo GIF (not video — GIFs autoplay in-feed, videos don't on mobile). Include `https://debugbridge.dev` in this tweet (link is surfaced in feed preview).
-   > "Your Windows C++ app crashed on a test machine. No AI tool can see the stack. You walk over. 30 minutes lost. → [demo GIF] → debugbridge.dev"
+1. **Hook tweet + media:** 1 sentence problem statement + demo GIF (not video — GIFs autoplay in-feed, videos don't on mobile). Include `https://stackly.dev` in this tweet (link is surfaced in feed preview).
+   > "Your Windows C++ app crashed on a test machine. No AI tool can see the stack. You walk over. 30 minutes lost. → [demo GIF] → stackly.dev"
 2. **The solution:** 1 sentence + code screenshot.
-   > "DebugBridge runs an MCP server on your dev machine that attaches to the remote crash. Claude Code / Cursor / Claude Desktop can read the stack directly."
+   > "Stackly runs an MCP server on your dev machine that attaches to the remote crash. Claude Code / Cursor / Claude Desktop can read the stack directly."
 3. **Why it works:** competitive wedge.
 4. **What's open-source / free:** MIT license, GitHub link.
 5. **Demo:** link to YouTube.
@@ -683,7 +683,7 @@ Sources:
 
 ### `CODE_OF_CONDUCT.md` — Contributor Covenant 2.1
 
-**Source:** [contributor-covenant.org/version/2/1/code_of_conduct.html](https://www.contributor-covenant.org/version/2/1/code_of_conduct/) — canonical. Use the interactive builder at the same site to fill `[INSERT CONTACT METHOD]` with the maintainer email (create `coc@debugbridge.dev` mail alias via Cloudflare Email Routing for free).
+**Source:** [contributor-covenant.org/version/2/1/code_of_conduct.html](https://www.contributor-covenant.org/version/2/1/code_of_conduct/) — canonical. Use the interactive builder at the same site to fill `[INSERT CONTACT METHOD]` with the maintainer email (create `coc@stackly.dev` mail alias via Cloudflare Email Routing for free).
 
 **Length:** ~150 lines, verbatim copy. Zero editorial work beyond the email substitution.
 
@@ -712,8 +712,8 @@ Recommended sections (in order):
 
 Please report security vulnerabilities privately using one of the following channels:
 
-1. **Preferred:** GitHub's private vulnerability reporting — go to the [Security tab](https://github.com/IdanG7/bridgeit/security) and click "Report a vulnerability".
-2. **Email:** security@debugbridge.dev
+1. **Preferred:** GitHub's private vulnerability reporting — go to the [Security tab](https://github.com/IdanG7/stackly/security) and click "Report a vulnerability".
+2. **Email:** security@stackly.dev
 
 Please do NOT open a public issue for security vulnerabilities.
 
@@ -723,7 +723,7 @@ Please do NOT open a public issue for security vulnerabilities.
 - **Triage:** within 7 days
 - **Fix timeline:** depends on severity; we will coordinate disclosure with you
 
-Thank you for helping keep DebugBridge and its users safe.
+Thank you for helping keep Stackly and its users safe.
 ```
 
 Enable GitHub's private-vulnerability-reporting feature in repo settings → Security → Private vulnerability reporting.
@@ -737,7 +737,7 @@ Sources:
 
 ```yaml
 name: Bug Report
-description: Report a reproducible bug in DebugBridge
+description: Report a reproducible bug in Stackly
 title: "[bug] "
 labels: ["bug", "triage"]
 body:
@@ -763,8 +763,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: DebugBridge version
-      description: Output of `debugbridge version`.
+      label: Stackly version
+      description: Output of `stackly version`.
       placeholder: "0.2.0"
     validations:
       required: true
@@ -785,8 +785,8 @@ body:
   - type: textarea
     id: doctor
     attributes:
-      label: debugbridge doctor output
-      description: Paste the full output of `debugbridge doctor`.
+      label: stackly doctor output
+      description: Paste the full output of `stackly doctor`.
       render: shell
     validations:
       required: true
@@ -801,7 +801,7 @@ body:
 
 ```yaml
 name: Feature Request
-description: Propose a new capability for DebugBridge
+description: Propose a new capability for Stackly
 title: "[feature] "
 labels: ["enhancement", "triage"]
 body:
@@ -816,7 +816,7 @@ body:
     id: proposal
     attributes:
       label: Proposed solution
-      description: How would you like DebugBridge to solve this?
+      description: How would you like Stackly to solve this?
     validations:
       required: true
   - type: textarea
@@ -839,10 +839,10 @@ body:
 blank_issues_enabled: false
 contact_links:
   - name: Questions / Discussions
-    url: https://github.com/IdanG7/bridgeit/discussions
+    url: https://github.com/IdanG7/stackly/discussions
     about: For open-ended questions, use Discussions instead of Issues.
   - name: Security vulnerabilities
-    url: https://github.com/IdanG7/bridgeit/security/advisories/new
+    url: https://github.com/IdanG7/stackly/security/advisories/new
     about: Report security issues privately here.
 ```
 
@@ -866,7 +866,7 @@ contact_links:
 
 - [ ] Unit tests pass: `uv run pytest -m "not integration"`
 - [ ] Integration tests pass (if touching pybag/DbgEng code): `$env:PYBAG_INTEGRATION = "1"; uv run pytest`
-- [ ] `debugbridge doctor` reports clean
+- [ ] `stackly doctor` reports clean
 - [ ] Manual end-to-end sanity check (if behavior-changing): `scripts/e2e_smoke.py`
 
 ## Checklist
@@ -889,9 +889,9 @@ Sources:
 ### Fields to set via `gh repo edit`
 
 ```bash
-gh repo edit IdanG7/bridgeit \
+gh repo edit IdanG7/stackly \
   --description "Remote crash capture MCP server for native Windows applications. Exposes live DbgEng debugger state (stack, exception, threads, locals) to Claude Code, Cursor, and Claude Desktop." \
-  --homepage "https://debugbridge.dev" \
+  --homepage "https://stackly.dev" \
   --add-topic mcp \
   --add-topic model-context-protocol \
   --add-topic mcp-server \
@@ -927,7 +927,7 @@ Design: project logo + tagline + screenshot of debugger state. Figma or Canva fr
 ### Repo badges (README top)
 
 ```markdown
-[![CI](https://github.com/IdanG7/bridgeit/actions/workflows/ci.yml/badge.svg)](https://github.com/IdanG7/bridgeit/actions)
+[![CI](https://github.com/IdanG7/stackly/actions/workflows/ci.yml/badge.svg)](https://github.com/IdanG7/stackly/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Windows](https://img.shields.io/badge/platform-Windows%2010%2F11-blue)](https://www.microsoft.com/windows/)
@@ -953,7 +953,7 @@ Sources:
 | Twitter Card tags | `astro-seo` | Same component; `card: "summary_large_image"`. |
 | Canonical URL | `astro-seo` | Auto from `Astro.url` + `astro.config.mjs` → `site` field. |
 | Alt text on images | Manual | Every `<img>` and `<Image>` needs `alt=""` (decorative) or a real description. |
-| Core Web Vitals | Lighthouse | Run `npx lighthouse https://debugbridge.dev --view` post-deploy. |
+| Core Web Vitals | Lighthouse | Run `npx lighthouse https://stackly.dev --view` post-deploy. |
 | Structured data (JSON-LD) | Manual `<script type="application/ld+json">` | **Not worth it for 2b.** JSON-LD helps `Organization`/`SoftwareApplication` rich results in Google, but for a single landing page the SEO gain is marginal (< 5% CTR uplift per Google docs). Add in 2c if the docs site makes it meaningful. |
 | Google Search Console | Manual setup | Verify domain via Cloudflare DNS TXT → submit sitemap URL. |
 
@@ -963,7 +963,7 @@ Sources:
 User-agent: *
 Allow: /
 
-Sitemap: https://debugbridge.dev/sitemap-index.xml
+Sitemap: https://stackly.dev/sitemap-index.xml
 ```
 
 ### Analytics — Cloudflare Web Analytics
@@ -1025,7 +1025,7 @@ Sources:
 
 ### Hard sequencing constraints
 
-1. **Domain registration before anything else.** Worst case: someone squats `debugbridge.dev` while we're planning. Register Day 0 of Phase 2b.
+1. **Domain registration before anything else.** Worst case: someone squats `stackly.dev` while we're planning. Register Day 0 of Phase 2b.
 2. **Demo video must exist before landing page ships.** Hero CTA embeds the video.
 3. **Landing page URL must exist before any directory submission** (all 4 directories surface the landing page URL as `websiteUrl`).
 4. **README rewrite should be complete before first directory submission** (all directories surface README content).
@@ -1079,11 +1079,11 @@ Sources:
 
 ## 13. Risks and Gotchas
 
-### R1: `debugbridge.dev` may be squatted
+### R1: `stackly.dev` may be squatted
 
-**Probability:** Low-medium. `.dev` is popular but "debugbridge" is a distinctive compound. Still, DebugBridge is not trademarked and someone reading this ROADMAP publicly could grab it.
+**Probability:** Low-medium. `.dev` is popular but "stackly" is a distinctive compound. Still, Stackly is not trademarked and someone reading this ROADMAP publicly could grab it.
 
-**Mitigation:** Register Day 0 of Phase 2b (before any public mentions). Plan fallback names in case it's taken: `debugbridge.app`, `getdebugbridge.dev`, `usedebugbridge.dev`, `debugbridge.run`. **Planner's first task should be to verify and register.**
+**Mitigation:** Register Day 0 of Phase 2b (before any public mentions). Plan fallback names in case it's taken: `stackly.app`, `getstackly.dev`, `usestackly.dev`, `stackly.run`. **Planner's first task should be to verify and register.**
 
 ### R2: MCP directory approval might block on PyPI (PARTIAL MITIGATION FOUND)
 
@@ -1127,7 +1127,7 @@ Sources:
 
 **Concern:** SECURITY.md and CODE_OF_CONDUCT.md want a contact email. Using a personal email exposes the maintainer to spam.
 
-**Mitigation:** Cloudflare Email Routing (free with Cloudflare-managed domain) — set up `security@debugbridge.dev`, `coc@debugbridge.dev`, `hello@debugbridge.dev` as forwards to the real inbox. Takes 10 minutes, no ongoing maintenance.
+**Mitigation:** Cloudflare Email Routing (free with Cloudflare-managed domain) — set up `security@stackly.dev`, `coc@stackly.dev`, `hello@stackly.dev` as forwards to the real inbox. Takes 10 minutes, no ongoing maintenance.
 
 ### R9: Google Search Console domain verification requires DNS TXT
 
@@ -1145,13 +1145,13 @@ Sources:
 
 ## Open Questions (for planner to resolve)
 
-### Q1: Is `debugbridge.dev` available?
+### Q1: Is `stackly.dev` available?
 
-**Must answer Day 0.** Research cannot verify from this environment. Planner's first concrete task: run `whois debugbridge.dev` or check a domain registrar. If unavailable, planner decides fallback name before any work proceeds.
+**Must answer Day 0.** Research cannot verify from this environment. Planner's first concrete task: run `whois stackly.dev` or check a domain registrar. If unavailable, planner decides fallback name before any work proceeds.
 
 ### Q2: Landing page repo location — `site/` subfolder vs. sibling repo?
 
-**Research recommends:** `site/` subfolder in the DebugBridge repo. Reasoning: single CI, single deploy key, single place to search, cleaner for solo maintainer.
+**Research recommends:** `site/` subfolder in the Stackly repo. Reasoning: single CI, single deploy key, single place to search, cleaner for solo maintainer.
 
 **Case for sibling repo:** keeps GitHub language-bar as pure Python; isolates site CI from main CI.
 
@@ -1186,7 +1186,7 @@ These rules evolve; research findings here are patterns, not current state.
 
 ### Q8: YouTube channel — personal vs. project?
 
-Research recommends YouTube as the primary video host but does not resolve: upload under the maintainer's personal channel, or create a `DebugBridge` project channel? Project channel adds one more surface to maintain; personal channel mixes content.
+Research recommends YouTube as the primary video host but does not resolve: upload under the maintainer's personal channel, or create a `Stackly` project channel? Project channel adds one more surface to maintain; personal channel mixes content.
 
 ### Q9: Preview-deploy gating of merges to main
 

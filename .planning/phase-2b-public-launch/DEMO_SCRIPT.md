@@ -1,8 +1,8 @@
-# DebugBridge — 60-Second Demo Script
+# Stackly — 60-Second Demo Script
 
 **Mode:** hand-off (matches 2a default).
 
-**CONSTRAINT:** This script describes hand-off mode only. Do NOT demonstrate autonomous PR creation (2a opt-in behind `--auto`) or unattended crash monitoring (scoped to 2.5). The demo shows a developer explicitly invoking `debugbridge fix` against a known crashed PID — nothing else.
+**CONSTRAINT:** This script describes hand-off mode only. Do NOT demonstrate autonomous PR creation (2a opt-in behind `--auto`) or unattended crash monitoring (scoped to 2.5). The demo shows a developer explicitly invoking `stackly fix` against a known crashed PID — nothing else.
 
 ---
 
@@ -12,10 +12,10 @@
 |------|------|--------|-----------|
 | Hook | 0:00–0:05 | `crash_app.exe` window on a remote test machine, red "Application has stopped working" error dialog center-screen. Text overlay: "Your C++ app crashed on a test machine. What now?" | Your C++ app just crashed on a test machine across the office. What now? |
 | Problem | 0:05–0:15 | Split-screen montage: developer walking to the test machine, reading a stack trace, copying text into Slack, pasting into a chat window, tabbing between windows. A clock in the corner ticks from 00:00 to 30:00. | You walk over, read the stack, copy it into Slack, paste it into Claude, write a fix. Thirty minutes gone. Multiply by five crashes a day and your whole week is wrecked. |
-| Solution setup | 0:15–0:25 | Cut to the developer's own machine. Clean terminal, single line typed: `debugbridge fix --pid 4892 --repo .` Cursor blinks. Enter is pressed at 0:23. | DebugBridge flips this. From your dev machine, run one command pointed at the crashed process and your repository. |
-| Live capture | 0:25–0:40 | Terminal streams output: `Capturing crash…` then `47 stack frames` then `12 local variables` then `Writing briefing…` then `Launching Claude Code…`. A Claude Code window slides in from the right with the briefing already visible in its context panel. No headless flag, no `.patch` file written, no PR. | DebugBridge captures the crash, pulls forty-seven stack frames and twelve local variables into a structured briefing, then hands it off to Claude Code with all the context already preloaded. No copy, no paste. |
+| Solution setup | 0:15–0:25 | Cut to the developer's own machine. Clean terminal, single line typed: `stackly fix --pid 4892 --repo .` Cursor blinks. Enter is pressed at 0:23. | Stackly flips this. From your dev machine, run one command pointed at the crashed process and your repository. |
+| Live capture | 0:25–0:40 | Terminal streams output: `Capturing crash…` then `47 stack frames` then `12 local variables` then `Writing briefing…` then `Launching Claude Code…`. A Claude Code window slides in from the right with the briefing already visible in its context panel. No headless flag, no `.patch` file written, no PR. | Stackly captures the crash, pulls forty-seven stack frames and twelve local variables into a structured briefing, then hands it off to Claude Code with all the context already preloaded. No copy, no paste. |
 | AI diagnosis | 0:40–0:50 | Zoom into the Claude Code chat panel. Claude's first message reads: "Null dereference at `render_target` in `draw.cpp:127`. Proposed fix:" followed by a unified-diff patch preview. The developer's cursor hovers over the patch — does not click apply. | Claude reads the briefing and spots a null dereference on render_target in draw.cpp at line one twenty-seven, then proposes a patch you can review right there in your editor. |
-| CTA | 0:50–1:00 | Full-screen card: large `debugbridge.dev` URL, GitHub octocat logo below, three small agent-name chips underneath: "Claude Code · Cursor · Claude Desktop". Static, no animation. | Hand-off, not magic. You stay in the driver's seat. Works with Claude Code, Cursor, and Claude Desktop. Install from GitHub. debugbridge.dev. |
+| CTA | 0:50–1:00 | Full-screen card: large `stackly.dev` URL, GitHub octocat logo below, three small agent-name chips underneath: "Claude Code · Cursor · Claude Desktop". Static, no animation. | Hand-off, not magic. You stay in the driver's seat. Works with Claude Code, Cursor, and Claude Desktop. Install from GitHub. stackly.dev. |
 
 **Voiceover word count:** 147 words
 

@@ -10,24 +10,24 @@ Each section below records the original issue text (condensed), the fix applied,
 
 ---
 
-## MAJOR 1 — `files_modified` omits `src/debugbridge/__init__.py`
+## MAJOR 1 — `files_modified` omits `src/stackly/__init__.py`
 
 ### Original issue
 
-Frontmatter `files_modified` list did NOT include `src/debugbridge/__init__.py`, but Task 2b.F.3 step 1 modifies it ("Bump version in `pyproject.toml` and `src/debugbridge/__init__.py` to `0.2.1`"). This contradicts the phase-level "zero functional code changes to `src/debugbridge/`" constraint. Verified against repo: `__version__ = "0.2.0"` exists at line 3 of `src/debugbridge/__init__.py`, so the bump is real.
+Frontmatter `files_modified` list did NOT include `src/stackly/__init__.py`, but Task 2b.F.3 step 1 modifies it ("Bump version in `pyproject.toml` and `src/stackly/__init__.py` to `0.2.1`"). This contradicts the phase-level "zero functional code changes to `src/stackly/`" constraint. Verified against repo: `__version__ = "0.2.0"` exists at line 3 of `src/stackly/__init__.py`, so the bump is real.
 
 ### Fix applied
 
 **Both (a) and (b):**
 
-- **(a)** Added `src/debugbridge/__init__.py` to frontmatter `files_modified` with trailing comment `# version-string bump only, no functional change` — makes the scope explicit in the frontmatter and discloses that the touch is packaging, not functional.
-- **(b)** Rewrote Task 2b.F.3 step 1 from the single-sentence bump instruction into an explicit branch: run `grep -c '^__version__' src/debugbridge/__init__.py`; if 0, do NOT create the attribute (pyproject.toml is authoritative); if >= 1, bump in lockstep. Text also re-affirms the "no functional code" constraint.
+- **(a)** Added `src/stackly/__init__.py` to frontmatter `files_modified` with trailing comment `# version-string bump only, no functional change` — makes the scope explicit in the frontmatter and discloses that the touch is packaging, not functional.
+- **(b)** Rewrote Task 2b.F.3 step 1 from the single-sentence bump instruction into an explicit branch: run `grep -c '^__version__' src/stackly/__init__.py`; if 0, do NOT create the attribute (pyproject.toml is authoritative); if >= 1, bump in lockstep. Text also re-affirms the "no functional code" constraint.
 
 ### File:line changes
 
 | File | Line | Change |
 |------|------|--------|
-| `.planning/phase-2b-public-launch/PLAN.md` | 19 | Added `- src/debugbridge/__init__.py  # version-string bump only, no functional change` inside `files_modified:` list |
+| `.planning/phase-2b-public-launch/PLAN.md` | 19 | Added `- src/stackly/__init__.py  # version-string bump only, no functional change` inside `files_modified:` list |
 | `.planning/phase-2b-public-launch/PLAN.md` | 1259 | Replaced step 1 of Task 2b.F.3 with explicit `grep -c`-driven branching |
 
 ---
@@ -83,7 +83,7 @@ Added a new component `ScopeStatus.astro` to Task 2b.B.4:
 
 - **Files list** gained `site/src/components/ScopeStatus.astro`.
 - **Action section** gained a `ScopeStatus` spec: two-column block with unique anchor `id="scope-status"`; left column `Today` = "Windows 10/11 + Claude Code / Cursor / Claude Desktop + hand-off fix-loop + install from source"; right column `Roadmap` = "PyPI install (2c), crash auto-detection (2.5), Linux / macOS (3), enterprise / cloud (4)"; placed below the McpConfig install CTA and above Footer.
-- **index.astro composition order** updated: `Hero -> VideoEmbed -> HowItWorks -> WhyDebugBridge -> McpConfig -> WhoItsFor -> ScopeStatus -> Footer`.
+- **index.astro composition order** updated: `Hero -> VideoEmbed -> HowItWorks -> WhyStackly -> McpConfig -> WhoItsFor -> ScopeStatus -> Footer`.
 - **Acceptance criterion** added: `grep -Ei '(today|roadmap)' site/src/pages/index.astro` returns >= 2 hits within the single `#scope-status` section; a secondary `grep -A 20 'id="scope-status"' site/src/components/ScopeStatus.astro | grep -cEi '(today|roadmap)'` returns >= 2.
 
 ### File:line changes

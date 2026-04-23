@@ -1,8 +1,8 @@
-# Contributing to DebugBridge
+# Contributing to Stackly
 
 ## Welcome
 
-Thanks for your interest in contributing. This project is in its early days and the bar for contribution is intentionally low: typo fixes, clearer docs, new tests, a repro for a flaky case, or a small bug fix are all genuinely helpful. If you are looking for somewhere to start, issues labeled [`good-first-issue`](https://github.com/IdanG7/bridgeit/issues?q=is%3Aissue+is%3Aopen+label%3Agood-first-issue) are a friendly entry point — they are scoped so you can land a change without first reading the whole codebase.
+Thanks for your interest in contributing. This project is in its early days and the bar for contribution is intentionally low: typo fixes, clearer docs, new tests, a repro for a flaky case, or a small bug fix are all genuinely helpful. If you are looking for somewhere to start, issues labeled [`good-first-issue`](https://github.com/IdanG7/stackly/issues?q=is%3Aissue+is%3Aopen+label%3Agood-first-issue) are a friendly entry point — they are scoped so you can land a change without first reading the whole codebase.
 
 ## Code of Conduct
 
@@ -10,24 +10,24 @@ Participation in this project is governed by [CODE_OF_CONDUCT.md](./CODE_OF_COND
 
 ## Reporting bugs
 
-Please file bugs via the [**New Issue**](https://github.com/IdanG7/bridgeit/issues/new/choose) button on GitHub. Selecting "Bug report" surfaces the form defined in [`.github/ISSUE_TEMPLATE/bug_report.yml`](./.github/ISSUE_TEMPLATE/bug_report.yml), which asks for the reproduction steps, `debugbridge version` output, OS build, and Python version we need to investigate. A tight repro is worth more than a long description — if you can reduce the failure to one command, include it.
+Please file bugs via the [**New Issue**](https://github.com/IdanG7/stackly/issues/new/choose) button on GitHub. Selecting "Bug report" surfaces the form defined in [`.github/ISSUE_TEMPLATE/bug_report.yml`](./.github/ISSUE_TEMPLATE/bug_report.yml), which asks for the reproduction steps, `stackly version` output, OS build, and Python version we need to investigate. A tight repro is worth more than a long description — if you can reduce the failure to one command, include it.
 
 ## Suggesting features
 
-Feature ideas also go through the [**New Issue**](https://github.com/IdanG7/bridgeit/issues/new/choose) flow. Pick "Feature request" to get the form at [`.github/ISSUE_TEMPLATE/feature_request.yml`](./.github/ISSUE_TEMPLATE/feature_request.yml). Tell us the problem you are hitting first, and the proposed solution second — we would rather discuss the shape of a change before you invest in a PR.
+Feature ideas also go through the [**New Issue**](https://github.com/IdanG7/stackly/issues/new/choose) flow. Pick "Feature request" to get the form at [`.github/ISSUE_TEMPLATE/feature_request.yml`](./.github/ISSUE_TEMPLATE/feature_request.yml). Tell us the problem you are hitting first, and the proposed solution second — we would rather discuss the shape of a change before you invest in a PR.
 
 ## Development setup
 
-DebugBridge development happens on Windows 10/11. You will need Python 3.11+, [uv](https://docs.astral.sh/uv/) >= 0.5, git, and the [Windows Debugging Tools](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/) (required for `pybag` — integration tests will skip without them, but you cannot run the MCP server against a real process).
+Stackly development happens on Windows 10/11. You will need Python 3.11+, [uv](https://docs.astral.sh/uv/) >= 0.5, git, and the [Windows Debugging Tools](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/) (required for `pybag` — integration tests will skip without them, but you cannot run the MCP server against a real process).
 
 ```bash
-git clone https://github.com/IdanG7/bridgeit.git
-cd bridgeit
+git clone https://github.com/IdanG7/stackly.git
+cd stackly
 uv sync --all-extras
-uv run debugbridge doctor
+uv run stackly doctor
 ```
 
-`uv sync --all-extras` installs the `dev` extras from `pyproject.toml` (pytest, ruff, pyright). `debugbridge doctor` verifies prerequisites and prints actionable errors if anything is missing.
+`uv sync --all-extras` installs the `dev` extras from `pyproject.toml` (pytest, ruff, pyright). `stackly doctor` verifies prerequisites and prints actionable errors if anything is missing.
 
 ## Running tests
 
@@ -95,6 +95,6 @@ Request review from [@IdanG7](https://github.com/IdanG7). We squash-merge by def
 
 ## Release process
 
-Releases are maintainer-only. DebugBridge follows [semantic versioning](https://semver.org/): `MAJOR.MINOR.PATCH`. Breaking changes to the MCP tool surface or CLI flags bump MAJOR, new tools or flags bump MINOR, and fixes bump PATCH. See [CHANGELOG.md](./CHANGELOG.md) for the release-notes pattern (one `## [X.Y.Z] — YYYY-MM-DD` section per release, grouped by `Added` / `Changed` / `Fixed`).
+Releases are maintainer-only. Stackly follows [semantic versioning](https://semver.org/): `MAJOR.MINOR.PATCH`. Breaking changes to the MCP tool surface or CLI flags bump MAJOR, new tools or flags bump MINOR, and fixes bump PATCH. See [CHANGELOG.md](./CHANGELOG.md) for the release-notes pattern (one `## [X.Y.Z] — YYYY-MM-DD` section per release, grouped by `Added` / `Changed` / `Fixed`).
 
-To cut a release, the maintainer bumps `version` in [`pyproject.toml`](./pyproject.toml) and `__version__` in [`src/debugbridge/__init__.py`](./src/debugbridge/__init__.py), updates `CHANGELOG.md`, commits, tags `vX.Y.Z`, and pushes the tag. PyPI publishing is tracked for Phase 2c; until then, users install from source per the [README](./README.md#install).
+To cut a release, the maintainer bumps `version` in [`pyproject.toml`](./pyproject.toml) and `__version__` in [`src/stackly/__init__.py`](./src/stackly/__init__.py), updates `CHANGELOG.md`, commits, tags `vX.Y.Z`, and pushes the tag. PyPI publishing is tracked for Phase 2c; until then, users install from source per the [README](./README.md#install).

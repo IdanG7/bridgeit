@@ -1,7 +1,7 @@
 # Phase 1 — Tech Stack & Architecture Map
 
 **Analysis Date:** 2026-04-15
-**Scope:** Everything shipped in commit `d514fb4` on `main`. This is the foundation Phase 2a (`debugbridge fix`) will build on top of.
+**Scope:** Everything shipped in commit `d514fb4` on `main`. This is the foundation Phase 2a (`stackly fix`) will build on top of.
 
 ---
 
@@ -13,11 +13,11 @@ D:\Projects\BridgeIt\
 ├── uv.lock                                # pinned
 ├── README.md, LICENSE (MIT)
 ├── dist\                                  # pre-built wheel + sdist (0.1.0)
-│   ├── debugbridge-0.1.0-py3-none-any.whl
-│   └── debugbridge-0.1.0.tar.gz
-├── src\debugbridge\
+│   ├── stackly-0.1.0-py3-none-any.whl
+│   └── stackly-0.1.0.tar.gz
+├── src\stackly\
 │   ├── __init__.py        (3 lines)      # __version__ = "0.1.0"
-│   ├── __main__.py        (6 lines)      # python -m debugbridge → cli.app
+│   ├── __main__.py        (6 lines)      # python -m stackly → cli.app
 │   ├── cli.py             (116 lines)    # Typer CLI: serve / doctor / version
 │   ├── env.py             (88 lines)     # Debugging Tools detection + PATH injection
 │   ├── models.py          (81 lines)     # 7 Pydantic wire-contract types
@@ -47,27 +47,27 @@ Totals: ~900 lines of production code, ~400 lines of tests, ~180 lines e2e scrip
 
 ## 2. Module-by-module reference
 
-### `src/debugbridge/__init__.py`
+### `src/stackly/__init__.py`
 
 Three lines. Exports `__version__ = "0.1.0"`. No imports. Safe to touch from anywhere (does NOT pull pybag transitively — that lives in `session.py` and is lazily imported there).
 
-### `src/debugbridge/__main__.py`
+### `src/stackly/__main__.py`
 
-Six lines. Enables `python -m debugbridge` by importing `cli.app` and calling it. Not critical for Phase 2a.
+Six lines. Enables `python -m stackly` by importing `cli.app` and calling it. Not critical for Phase 2a.
 
-### `src/debugbridge/cli.py`
+### `src/stackly/cli.py`
 
-Typer CLI with three commands, wired through a single `typer.Typer(name="debugbridge", no_args_is_help=True)` instance at `cli.py:19-24`. Exposed as a console script via `pyproject.toml:38` → `debugbridge = "debugbridge.cli:app"`.
+Typer CLI with three commands, wired through a single `typer.Typer(name="stackly", no_args_is_help=True)` instance at `cli.py:19-24`. Exposed as a console script via `pyproject.toml:38` → `stackly = "stackly.cli:app"`.
 
-- **`serve`** (`cli.py:29-67`): Starts the MCP server. Takes `--transport {http,stdio}` (default `http`), `--host` (default `127.0.0.1`), `--port` (default `8585`), `--skip-env-check` (bypasses `check_debugging_tools()`). At `cli.py:48-56` runs `check_debugging_tools()` and aborts with install guidance if tools are missing. At `cli.py:59` the server module (`from debugbridge.server import run`) is imported **lazily**, so `serve` is the only command that ever touches pybag. Prints `DebugBridge serving on http://{host}:{port}/mcp` before calling `run(transport, host, port)`.
+- **`serve`** (`cli.py:29-67`): Starts the MCP server. Takes `--transport {http,stdio}` (default `http`), `--host` (default `127.0.0.1`), `--port` (default `8585`), `--skip-env-check` (bypasses `check_debugging_tools()`). At `cli.py:48-56` runs `check_debugging_tools()` and aborts with install guidance if tools are missing. At `cli.py:59` the server module (`from stackly.server import run`) is imported **lazily**, so `serve` is the only command that ever touches pybag. Prints `Stackly serving on http://{host}:{port}/mcp` before calling `run(transport, host, port)`.
 
 - **`doctor`** (`cli.py:70-95`): Runs `check_debugging_tools()` and renders a `rich.Table` with each component's status (`found`/`missing`) and resolved path. Exits 0 when all are present, 1 otherwise. Does NOT import pybag.
 
-- **`version`** (`cli.py:98-101`): Prints `debugbridge 0.1.0`. No imports beyond the module.
+- **`version`** (`cli.py:98-101`): Prints `stackly 0.1.0`. No imports beyond the module.
 
 There is also a `main()` wrapper at `cli.py:104-112` that converts untrapped exceptions to `sys.exit(1)`.
 
-### `src/debugbridge/env.py`
+### `src/stackly/env.py`
 
 Zero-dependency-on-pybag environment detector. Safe on any platform (though the canonical path is Windows-only).
 
@@ -77,7 +77,7 @@ Zero-dependency-on-pybag environment detector. Safe on any platform (though the 
 - **`check_debugging_tools()`** (`env.py:55-73`): for each required component, calls `_find_on_path_or_canonical()` which does `shutil.which(name)` first, falling back to `CANONICAL_DEBUGGERS_X64 / name` existence check. Returns an `EnvCheckResult`.
 - **`ensure_dbgeng_on_path()`** (`env.py:76-88`): idempotent PATH prepender. If the canonical debuggers dir exists and is not already in `PATH`, prepends it so `ctypes.windll.LoadLibrary` (used by pybag) will find `dbgeng.dll`. Called at the top of `DebugSession._make_userdbg()` and at the top of `conftest.py`'s collection hook.
 
-### `src/debugbridge/models.py`
+### `src/stackly/models.py`
 
 Seven Pydantic v2 models that form the wire contract returned to MCP clients. Tools in `tools.py` must return one of these; no ad-hoc dicts.
 
@@ -91,9 +91,9 @@ Seven Pydantic v2 models that form the wire contract returned to MCP clients. To
 
 Phase 2a will likely need to extend these (e.g. add a `Briefing` model or bundle exception+stack+locals). Nothing in the current models is marked internal/private — all fields are part of the MCP wire format.
 
-### `src/debugbridge/session.py`
+### `src/stackly/session.py`
 
-The heart of DebugBridge. 445 lines, one class (`DebugSession`), one helper exception, and three module-level regex parsers. Read this file before touching anything in Phase 2a that interacts with the debugger.
+The heart of Stackly. 445 lines, one class (`DebugSession`), one helper exception, and three module-level regex parsers. Read this file before touching anything in Phase 2a that interacts with the debugger.
 
 **Key design invariants (from the module docstring at `session.py:1-18`):**
 - This is the **only** module allowed to import pybag.
@@ -146,11 +146,11 @@ The heart of DebugBridge. 445 lines, one class (`DebugSession`), one helper exce
 
 - **`_safe_get()`** (`session.py:437-445`): staticmethod helper that tries `getattr(obj, method_name)()` and returns `default` on any exception or non-callable.
 
-### `src/debugbridge/server.py`
+### `src/stackly/server.py`
 
 Forty-six lines of FastMCP wiring.
 
-- **`build_app()`** (`server.py:17-23`): constructs a `FastMCP("debugbridge")` instance and a fresh `DebugSession()`, then calls `tools.register(mcp, session)`. Returns `(mcp, session)`. Separate from `run()` so tests can exercise the server without a socket.
+- **`build_app()`** (`server.py:17-23`): constructs a `FastMCP("stackly")` instance and a fresh `DebugSession()`, then calls `tools.register(mcp, session)`. Returns `(mcp, session)`. Separate from `run()` so tests can exercise the server without a socket.
 
 - **`run(transport, host, port)`** (`server.py:26-46`): builds the app, then:
   - For HTTP: sets `mcp.settings.host` and `mcp.settings.port`, calls `mcp.run(transport="streamable-http")`. Comment at `server.py:39-41` notes FastMCP 1.27 uses `"streamable-http"` internally but the CLI exposes the alias `"http"`.
@@ -158,7 +158,7 @@ Forty-six lines of FastMCP wiring.
 
 Endpoint: `http://{host}:{port}/mcp` — the MCP Streamable HTTP convention. Default bind `127.0.0.1:8585`.
 
-### `src/debugbridge/tools.py`
+### `src/stackly/tools.py`
 
 Eight tool adapters. All registered on a single `FastMCP` instance by `register(mcp, session)` at `tools.py:27-110`. Each function is a thin wrapper over a `DebugSession` method — no tool is longer than ~25 lines.
 
@@ -251,7 +251,7 @@ def pytest_collection_modifyitems(config, items):
     if not _CRASH_APP.exists():
         skip_reason = f"crash_app not built at {_CRASH_APP}. Run tests/fixtures/crash_app/build.ps1."
     elif not check_debugging_tools().ok:
-        skip_reason = "Windows Debugging Tools not installed (run `debugbridge doctor`)."
+        skip_reason = "Windows Debugging Tools not installed (run `stackly doctor`)."
     if skip_reason is None:
         ensure_dbgeng_on_path()  # prep for pybag import
         return
@@ -269,7 +269,7 @@ When both pass, `ensure_dbgeng_on_path()` is called **before** any test imports 
 
 **Pybag access pattern** (`tests/test_session_integration.py:83-91`): the one test that launches a process under the debugger (`test_catch_null_deref_crash_via_create`) imports pybag inside the test body after calling `ensure_dbgeng_on_path()`:
 ```python
-from debugbridge.env import ensure_dbgeng_on_path
+from stackly.env import ensure_dbgeng_on_path
 ensure_dbgeng_on_path()
 from pybag.userdbg import UserDbg
 dbg = UserDbg()
@@ -294,7 +294,7 @@ It then hands the raw `UserDbg` to the session by assignment: `session._dbg = db
 
 ## 6. `scripts/e2e_smoke.py` — the Phase 2a blueprint
 
-This is 178 lines and is the template Phase 2a's `debugbridge fix` will likely follow. Key pieces:
+This is 178 lines and is the template Phase 2a's `stackly fix` will likely follow. Key pieces:
 
 **Constants (`e2e_smoke.py:28-30`):**
 ```python
@@ -304,8 +304,8 @@ MCP_URL = "http://127.0.0.1:8585/mcp"
 ```
 
 **Server lifecycle — `spawn_server()` async context manager (L37-73):**
-- Launches `subprocess.Popen(["uv", "run", "debugbridge", "serve", "--port", "8585"], cwd=ROOT, stdout=PIPE, stderr=STDOUT, text=True, bufsize=1, creationflags=CREATE_NEW_PROCESS_GROUP)`.
-- **Readiness probe:** reads `proc.stdout` line-by-line, waits up to 30 seconds for the string `"Uvicorn running"` to appear (NOT the `"DebugBridge serving on..."` line that `cli.py:63-64` prints — that comes BEFORE uvicorn is actually listening).
+- Launches `subprocess.Popen(["uv", "run", "stackly", "serve", "--port", "8585"], cwd=ROOT, stdout=PIPE, stderr=STDOUT, text=True, bufsize=1, creationflags=CREATE_NEW_PROCESS_GROUP)`.
+- **Readiness probe:** reads `proc.stdout` line-by-line, waits up to 30 seconds for the string `"Uvicorn running"` to appear (NOT the `"Stackly serving on..."` line that `cli.py:63-64` prints — that comes BEFORE uvicorn is actually listening).
 - **Shutdown:** on Windows sends `CTRL_BREAK_EVENT` (hence the `CREATE_NEW_PROCESS_GROUP` flag); on POSIX, `terminate()`. Gives 5 seconds for clean exit, then `.kill()`.
 
 **Crash app spawn — `spawn_crash_app_waiting()` (L76-92):**
@@ -345,7 +345,7 @@ async with streamablehttp_client(MCP_URL) as (read, write, _session_id_cb):
 
 ### How the fix agent connects as an MCP client
 
-The fix agent is a Python process that acts as an MCP client against `debugbridge serve`. It uses the exact same API `e2e_smoke.py` uses:
+The fix agent is a Python process that acts as an MCP client against `stackly serve`. It uses the exact same API `e2e_smoke.py` uses:
 
 ```python
 from mcp import ClientSession
@@ -384,12 +384,12 @@ The real strings for e.g. `get_callstack` can be seen in `e2e_smoke.py:137` wher
 ### Server process management
 
 `e2e_smoke.py` shows the pattern:
-- **Start:** `subprocess.Popen(["uv", "run", "debugbridge", "serve", "--port", "8585"], creationflags=CREATE_NEW_PROCESS_GROUP)` + parse stdout for `"Uvicorn running"` (30s timeout).
+- **Start:** `subprocess.Popen(["uv", "run", "stackly", "serve", "--port", "8585"], creationflags=CREATE_NEW_PROCESS_GROUP)` + parse stdout for `"Uvicorn running"` (30s timeout).
 - **Stop (Windows):** `proc.send_signal(signal.CTRL_BREAK_EVENT)` + `proc.wait(timeout=5)` + fallback `proc.kill()`.
 - **Port:** hard-coded 8585 in both CLI default and smoke script.
 - **Endpoint:** `http://127.0.0.1:8585/mcp`.
 
-Phase 2a's `debugbridge fix` command will need to reproduce this — either by auto-starting the server if not already running (matching the `GOAL.md` directive "auto-started as a subprocess if not running") or by requiring the user to run it separately.
+Phase 2a's `stackly fix` command will need to reproduce this — either by auto-starting the server if not already running (matching the `GOAL.md` directive "auto-started as a subprocess if not running") or by requiring the user to run it separately.
 
 ---
 
@@ -437,7 +437,7 @@ Looking at the models against the GOAL.md expectations:
 - **No per-request timeouts.** Any MCP call that ends up inside `dbg.cmd(...)` can block indefinitely (e.g. if symbol resolution stalls against a slow symbol server). The session lock means a stuck call blocks all other requests.
 - **Single-session model.** One `DebugSession` per server process. If Phase 2a ever needs to attach to two processes concurrently, the server needs rework. (Not in 2a scope — GOAL.md `--pid` is single-valued.)
 - **Logging is print-only.** The CLI writes via `rich.Console`; `DebugSession` emits nothing. No structured logging. Debugging a failed tool call from the client side means looking at the exception message and nothing else.
-- **No PyPI release.** Wheel at `dist/debugbridge-0.1.0-py3-none-any.whl` builds cleanly, but Phase 2c handles the actual publish.
+- **No PyPI release.** Wheel at `dist/stackly-0.1.0-py3-none-any.whl` builds cleanly, but Phase 2c handles the actual publish.
 
 ---
 
@@ -468,16 +468,16 @@ Pyright config: `typeCheckingMode = "basic"`, `reportMissingTypeStubs = false` (
 - The 8 MCP tool names and signatures are fixed (GOAL.md: "No change to the existing 8 MCP tools' public signatures").
 - The Pydantic model field names / types are the wire format. Additions are safe; removals are not.
 - `DebugSession` is the single pybag consumer. Phase 2a's agent goes through MCP, not through direct imports (GOAL.md: "never calls `DebugSession` directly").
-- Lazy pybag import pattern is load-bearing — `debugbridge doctor` / `version` must continue to work on a machine without Debugging Tools.
+- Lazy pybag import pattern is load-bearing — `stackly doctor` / `version` must continue to work on a machine without Debugging Tools.
 - HTTP endpoint is `http://127.0.0.1:8585/mcp`, port configurable via `--port`.
 
 **Reusable plumbing:**
 - `env.check_debugging_tools()` + `env.ensure_dbgeng_on_path()` — Phase 2a can call these before spawning the server.
 - `tests/conftest.py:28-45` auto-skip pattern — Phase 2a integration tests can reuse the same gate.
 - `crash_app_waiting` fixture — Phase 2a tests can use it as-is to get a live PID for `fix --pid N`.
-- `scripts/e2e_smoke.py` — the full server-spawn + MCP-client flow is a drop-in template for how `debugbridge fix` should orchestrate its own server subprocess.
+- `scripts/e2e_smoke.py` — the full server-spawn + MCP-client flow is a drop-in template for how `stackly fix` should orchestrate its own server subprocess.
 
-**Known-good end-to-end proof:** `uv run python scripts/e2e_smoke.py` is the repeatable acceptance evidence for Phase 1 — Phase 2a should add its own analogous script (or CLI command) that runs `debugbridge fix --pid <wait_pid> --auto ...` end-to-end against the same `crash_app null` crash and asserts a non-empty `.patch` at `.debugbridge/patches/`.
+**Known-good end-to-end proof:** `uv run python scripts/e2e_smoke.py` is the repeatable acceptance evidence for Phase 1 — Phase 2a should add its own analogous script (or CLI command) that runs `stackly fix --pid <wait_pid> --auto ...` end-to-end against the same `crash_app null` crash and asserts a non-empty `.patch` at `.stackly/patches/`.
 
 ---
 

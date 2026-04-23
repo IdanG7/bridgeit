@@ -15,7 +15,7 @@
 
 - [ ] Unit tests pass: `uv run pytest -m "not integration"`
 - [ ] Integration tests pass (if touching pybag/DbgEng code): `$env:PYBAG_INTEGRATION = "1"; uv run pytest`
-- [ ] `debugbridge doctor` reports clean
+- [ ] `stackly doctor` reports clean
 - [ ] Manual end-to-end sanity check (if behavior-changing): `scripts/e2e_smoke.py`
 
 ## Checklist

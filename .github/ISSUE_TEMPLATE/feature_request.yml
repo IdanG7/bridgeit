@@ -1,5 +1,5 @@
 name: Feature Request
-description: Propose a new capability for DebugBridge
+description: Propose a new capability for Stackly
 title: "[feature] "
 labels: ["enhancement", "triage"]
 body:
@@ -14,7 +14,7 @@ body:
     id: proposal
     attributes:
       label: Proposed solution
-      description: How would you like DebugBridge to solve this?
+      description: How would you like Stackly to solve this?
     validations:
       required: true
   - type: textarea

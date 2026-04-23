@@ -6,7 +6,7 @@ depends_on: [phase-2a-fix-loop-mvp]
 autonomous: false  # mixed — many non-code tasks require human action
 requirements:
   - "GOAL-1: README rewrite for public audience shipped on main"
-  - "GOAL-2: Landing page at debugbridge.dev live, Lighthouse >= 90 all four categories"
+  - "GOAL-2: Landing page at stackly.dev live, Lighthouse >= 90 all four categories"
   - "GOAL-3: 60-second demo video recorded, edited, captioned, uploaded, linked"
   - "GOAL-4: Submitted to >= 4 MCP directories, tracked in DIRECTORY_SUBMISSIONS.md"
   - "GOAL-5: Launch post drafts (HN, Reddit, Twitter) written, stored, NOT published"
@@ -16,7 +16,7 @@ files_modified:
   - README.md
   - CHANGELOG.md
   - pyproject.toml
-  - src/debugbridge/__init__.py  # version-string bump only, no functional change
+  - src/stackly/__init__.py  # version-string bump only, no functional change
   - CONTRIBUTING.md
   - CODE_OF_CONDUCT.md
   - SECURITY.md
@@ -35,9 +35,9 @@ must_haves:
   truths:
     # GOAL-1
     - "Stranger lands on README and understands the product in <60s"
-    - "Stranger follows README quickstart on fresh Windows 10/11 box and reaches `debugbridge fix` hand-off"
+    - "Stranger follows README quickstart on fresh Windows 10/11 box and reaches `stackly fix` hand-off"
     # GOAL-2
-    - "debugbridge.dev resolves to a static landing page served over HTTPS"
+    - "stackly.dev resolves to a static landing page served over HTTPS"
     - "Landing page Lighthouse score >= 90 for Performance, Accessibility, Best Practices, SEO"
     - "Landing page embeds the 60s demo video above the fold"
     - "Landing page source committed to repo under site/"
@@ -54,7 +54,7 @@ must_haves:
     - "GitHub repo description, homepage, and topics are set"
     # GOAL-7
     - "robots.txt + sitemap.xml served from landing page"
-    - "Google Search Console verified for debugbridge.dev, sitemap submitted"
+    - "Google Search Console verified for stackly.dev, sitemap submitted"
   artifacts:
     - path: "README.md"
       provides: "Public-audience README (hero, quickstart, architecture diagram, MCP client configs, troubleshooting, demo embed)"
@@ -100,27 +100,27 @@ must_haves:
       via: "thumbnail markdown link in hero section"
       pattern: "youtu\\.be|youtube\\.com"
     - from: "README.md"
-      to: "https://debugbridge.dev"
+      to: "https://stackly.dev"
       via: "footer links + hero CTA"
-      pattern: "debugbridge\\.dev"
+      pattern: "stackly\\.dev"
     - from: "site/src/pages/index.astro"
       to: "YouTube demo video URL"
       via: "VideoEmbed.astro (lite-youtube-embed wrapper)"
       pattern: "lite-youtube|youtube"
     - from: "site/src/pages/index.astro"
-      to: "https://github.com/IdanG7/bridgeit"
+      to: "https://github.com/IdanG7/stackly"
       via: "hero + footer CTA buttons"
-      pattern: "github\\.com/IdanG7/bridgeit"
+      pattern: "github\\.com/IdanG7/stackly"
     - from: "site/public/robots.txt"
-      to: "https://debugbridge.dev/sitemap-index.xml"
+      to: "https://stackly.dev/sitemap-index.xml"
       via: "Sitemap: directive"
       pattern: "Sitemap:"
     - from: "server.json"
-      to: "https://debugbridge.dev"
+      to: "https://stackly.dev"
       via: "websiteUrl field"
       pattern: "websiteUrl"
     - from: "server.json"
-      to: "https://github.com/IdanG7/bridgeit"
+      to: "https://github.com/IdanG7/stackly"
       via: "repository.url field"
       pattern: "repository"
     - from: ".planning/phase-2b-public-launch/DIRECTORY_SUBMISSIONS.md"
@@ -134,14 +134,14 @@ must_haves:
 <!-- Revision 2 (iteration 2/3) — applied 9 checker fixes: 2 MAJOR (frontmatter files_modified + requests→stdlib), 4 MINOR (A.3 cross-ref, landing ScopeStatus, lite-youtube-embed step, tools-table grep), 3 NIT (CHANGELOG generic, Wave-1 B-track sequencing note, thumbnail path pre-decision). See .planning/phase-2b-public-launch/PLAN_CHECK.md. -->
 
 **Plan date:** 2026-04-18
-**Phase goal (one sentence):** DebugBridge is discoverable and installable by strangers on the internet — a stranger lands on a page, understands the product in under 60 seconds, follows a quickstart that works on a fresh Windows dev machine, and finds the project via multiple independent channels (MCP directories, HN, Reddit, Twitter, search).
+**Phase goal (one sentence):** Stackly is discoverable and installable by strangers on the internet — a stranger lands on a page, understands the product in under 60 seconds, follows a quickstart that works on a fresh Windows dev machine, and finds the project via multiple independent channels (MCP directories, HN, Reddit, Twitter, search).
 **Source of truth:** `GOAL.md` (7 acceptance criteria), `RESEARCH.md` (Standard Stack in §Standard Stack, DAG in §11, effort estimates in §12, 9 Open Questions), `../ROADMAP.md` (Phase 2b scope lines 35-44).
 
 ---
 
 ## 1. Context
 
-Phase 2a ships the `debugbridge fix` fix-loop MVP — the product surface is now demonstrable end-to-end (remote crash -> capture -> Claude Code hand-off -> diagnosis/patch). Phase 2b is pure marketing + packaging: it does NOT touch `src/debugbridge/`. Zero functional code changes. The job is to turn "a GitHub repo you can clone" into "a discoverable product strangers can find and install."
+Phase 2a ships the `stackly fix` fix-loop MVP — the product surface is now demonstrable end-to-end (remote crash -> capture -> Claude Code hand-off -> diagnosis/patch). Phase 2b is pure marketing + packaging: it does NOT touch `src/stackly/`. Zero functional code changes. The job is to turn "a GitHub repo you can clone" into "a discoverable product strangers can find and install."
 
 Seven deliverables, seven GOAL criteria, mapped to the `must_haves.truths` block above: README rewrite, landing page, demo video, 4 directory submissions, launch post drafts, OSS scaffolding (CONTRIBUTING/COC/SECURITY/.github templates), discoverability (GSC + repo metadata). Most of this is parallelizable — the RESEARCH.md §11 DAG identifies 4 mostly-independent tracks plus a final merge wave.
 
@@ -151,7 +151,7 @@ Explicitly deferred (from GOAL.md non-goals): PyPI publish (2c), docs site (2c),
 
 These are locked for Phase 2b. Changing any of them requires updating this plan first.
 
-1. **Landing page lives in `site/` subfolder of the DebugBridge repo** (not a sibling repo). Rationale: single CI, single deploy key, single place to search — solo-maintainer debt avoided. (RESEARCH.md §1, Open Question Q2 — resolved by planner per research recommendation.) GitHub's language-stats bar is kept Python-dominant via a `.gitattributes` entry marking `site/**` as `linguist-documentation` (or `linguist-vendored` if documentation flag proves insufficient).
+1. **Landing page lives in `site/` subfolder of the Stackly repo** (not a sibling repo). Rationale: single CI, single deploy key, single place to search — solo-maintainer debt avoided. (RESEARCH.md §1, Open Question Q2 — resolved by planner per research recommendation.) GitHub's language-stats bar is kept Python-dominant via a `.gitattributes` entry marking `site/**` as `linguist-documentation` (or `linguist-vendored` if documentation flag proves insufficient).
 
 2. **Stack: Astro 6 + Tailwind v4 + `@astrojs/sitemap` + `astro-seo`, deployed to Cloudflare Pages, domain on Cloudflare Registrar.** No Vercel (commercial-use clause), no Next.js (overkill), no plain HTML (Lighthouse SEO hard without plugins). (RESEARCH.md §Standard Stack, §1, §2.)
 
@@ -175,9 +175,9 @@ These are locked for Phase 2b. Changing any of them requires updating this plan 
 
 Four open questions from RESEARCH.md that the planner cannot resolve from a workspace (they need real-world information):
 
-- **Q1 (domain availability).** Task 2b.0.1 is a CHECKPOINT: human runs WHOIS / registrar search, registers immediately if available, picks a fallback name if not. Fallback order: `debugbridge.app` > `getdebugbridge.dev` > `usedebugbridge.dev` > `debugbridge.run`.
+- **Q1 (domain availability).** Task 2b.0.1 is a CHECKPOINT: human runs WHOIS / registrar search, registers immediately if available, picks a fallback name if not. Fallback order: `stackly.app` > `getstackly.dev` > `usestackly.dev` > `stackly.run`.
 - **Q3 (Twitter handle).** Task 2b.0.3 is a CHECKPOINT: human confirms `@IdanG7` is live or provides the correct handle, OR decides to skip Twitter entirely (in which case task 2b.D.3 becomes no-op and LAUNCH_POSTS.md reflects a two-platform launch).
-- **Q8 (YouTube channel — personal vs project).** Task 2b.0.4 is a CHECKPOINT: human decides `personal @IdanG7` vs newly-created `DebugBridge` project channel. Affects task 2b.C.4 metadata.
+- **Q8 (YouTube channel — personal vs project).** Task 2b.0.4 is a CHECKPOINT: human decides `personal @IdanG7` vs newly-created `Stackly` project channel. Affects task 2b.C.4 metadata.
 - **Q6 (Reddit subreddit rules current state).** Task 2b.F.1 (launch-readiness) includes a re-verification step: human checks r/cpp and r/gamedev sidebars at submission time. Not a CHECKPOINT at planning time, but a pre-publication check baked into the LAUNCH_READINESS checklist.
 
 ## 3. Component / deliverable breakdown
@@ -216,7 +216,7 @@ D:/Projects/BridgeIt/
 │       │   ├── Hero.astro
 │       │   ├── VideoEmbed.astro               # lite-youtube-embed
 │       │   ├── HowItWorks.astro
-│       │   ├── WhyDebugBridge.astro
+│       │   ├── WhyStackly.astro
 │       │   ├── McpConfig.astro                # tabbed: Claude Code / Cursor / Claude Desktop
 │       │   ├── WhoItsFor.astro
 │       │   └── Footer.astro
@@ -251,18 +251,18 @@ Global note: Phase 2b has near-zero code, so RED-first TDD is only triggered for
 
 Run these before committing to any other track. Domain registration MUST be Day 0 (squat risk R1).
 
-#### Task 2b.0.1 — Verify `debugbridge.dev` availability and register
+#### Task 2b.0.1 — Verify `stackly.dev` availability and register
 
-- **Files:** none (external action). Record outcome in `.planning/phase-2b-public-launch/DOMAIN.md` (new file — single line: `Registered debugbridge.dev at Cloudflare Registrar on 2026-MM-DD` or `Fallback chosen: <name>, reason: <primary taken>`).
+- **Files:** none (external action). Record outcome in `.planning/phase-2b-public-launch/DOMAIN.md` (new file — single line: `Registered stackly.dev at Cloudflare Registrar on 2026-MM-DD` or `Fallback chosen: <name>, reason: <primary taken>`).
 - **Action (CHECKPOINT — human):**
-  1. Check availability at [cloudflare.com/application-services/products/registrar/buy-dev-domains](https://www.cloudflare.com/application-services/products/registrar/buy-dev-domains/) or run `whois debugbridge.dev` on a box with WHOIS tooling.
-  2. If available: register `debugbridge.dev` at Cloudflare Registrar (at-cost ~$10-12/yr, free WHOIS privacy). Do NOT register at Namecheap/Porkbun — Cloudflare Registrar auto-integrates DNS with Pages (Task 2b.B.4).
-  3. If taken: pick fallback in this order — `debugbridge.app` > `getdebugbridge.dev` > `usedebugbridge.dev` > `debugbridge.run`. Update all references in this plan and in GOAL.md (`s/debugbridge.dev/<chosen>/g`). Commit the rename in a single diff titled `chore(phase-2b): rename landing domain to <chosen>`.
+  1. Check availability at [cloudflare.com/application-services/products/registrar/buy-dev-domains](https://www.cloudflare.com/application-services/products/registrar/buy-dev-domains/) or run `whois stackly.dev` on a box with WHOIS tooling.
+  2. If available: register `stackly.dev` at Cloudflare Registrar (at-cost ~$10-12/yr, free WHOIS privacy). Do NOT register at Namecheap/Porkbun — Cloudflare Registrar auto-integrates DNS with Pages (Task 2b.B.4).
+  3. If taken: pick fallback in this order — `stackly.app` > `getstackly.dev` > `usestackly.dev` > `stackly.run`. Update all references in this plan and in GOAL.md (`s/stackly.dev/<chosen>/g`). Commit the rename in a single diff titled `chore(phase-2b): rename landing domain to <chosen>`.
   4. Write `.planning/phase-2b-public-launch/DOMAIN.md` with: chosen domain, registrar, registration date, (if fallback) reason.
 - **Acceptance criteria:**
   - Domain is registered under the maintainer's Cloudflare account (or fallback, documented).
   - `DOMAIN.md` exists and records the choice.
-  - If fallback was needed, every `debugbridge.dev` reference in this plan, GOAL.md, and RESEARCH.md (search-and-replace scope documented in DOMAIN.md) is updated.
+  - If fallback was needed, every `stackly.dev` reference in this plan, GOAL.md, and RESEARCH.md (search-and-replace scope documented in DOMAIN.md) is updated.
 - **Size:** S (10 min if available and clean)
 - **Autonomy:** CHECKPOINT
 - **Resume signal:** "domain registered: <name>" or "fallback chosen: <name>"
@@ -291,7 +291,7 @@ Run these before committing to any other track. Domain registration MUST be Day 
 - **Files:** `.planning/phase-2b-public-launch/DECISIONS.md` (new file — append `Twitter handle: <value or SKIP>`).
 - **Action (CHECKPOINT — human):** Decide between three options:
   - **Option A:** Use existing personal handle (e.g., `@IdanG7`). Verify it's live and the maintainer controls it.
-  - **Option B:** Create a new project handle `@DebugBridgeDev` (or similar). Reserve it now (takes 2 min).
+  - **Option B:** Create a new project handle `@StacklyDev` (or similar). Reserve it now (takes 2 min).
   - **Option C:** Skip Twitter for 2b. Drops Twitter/X thread from LAUNCH_POSTS.md (Task 2b.D.3 becomes no-op); `astro-seo` config (Task 2b.B.6) omits `twitter.creator`.
 - **Acceptance criteria:**
   - `DECISIONS.md` has a single line: `Twitter handle: @<handle>` or `Twitter handle: SKIP`.
@@ -305,8 +305,8 @@ Run these before committing to any other track. Domain registration MUST be Day 
 
 - **Files:** `.planning/phase-2b-public-launch/DECISIONS.md` (append `YouTube channel: <name + URL>`).
 - **Action (CHECKPOINT — human):** Decide between:
-  - **Option A:** Upload under maintainer's personal YouTube channel (zero setup; mixes DebugBridge with unrelated personal content).
-  - **Option B:** Create a new `DebugBridge` YouTube channel on the maintainer's Google account (15 min, dedicated project surface).
+  - **Option A:** Upload under maintainer's personal YouTube channel (zero setup; mixes Stackly with unrelated personal content).
+  - **Option B:** Create a new `Stackly` YouTube channel on the maintainer's Google account (15 min, dedicated project surface).
 - **Acceptance criteria:**
   - `DECISIONS.md` has `YouTube channel: <display name>` + `Channel URL: <url>`.
   - If Option B, channel exists, channel art matches project branding (can be a placeholder logo — design polish lives in Task 2b.D.4 social-preview image work).
@@ -329,30 +329,30 @@ Eight tasks. All AUTO (pure text production). All can start immediately — none
   2. **Badges row** (immediately under title): CI status badge, `License: MIT`, `Python 3.11+`, `platform: Windows 10/11` — exact markdown copied from RESEARCH.md §9 "Repo badges" block. No PyPI badge (2c).
   3. **Status callout:** Replace Phase 2a callout with: `"**Alpha** — API stable, not yet on PyPI (clone to install). MIT-licensed. Windows 10/11 only for now; Linux/macOS/Unity are on the roadmap (Phase 3)."`
   4. **Hero demo embed (NEW):** `[![Watch the 60s demo](docs/demo-thumb.png)](https://youtu.be/XXXX)` — placeholder URL until Task 2b.C.4 completes; the link gets updated by Task 2b.C.5. Thumbnail path is a placeholder too (real image lands in Task 2b.C.3).
-  5. **Why DebugBridge (KEEP + ADD wedge sentence):** Keep current 30-60 min framing. Add: `"No other tool combines remote debugger capture, MCP exposure, and an autonomous repair agent in one flow."`
+  5. **Why Stackly (KEEP + ADD wedge sentence):** Keep current 30-60 min framing. Add: `"No other tool combines remote debugger capture, MCP exposure, and an autonomous repair agent in one flow."`
   6. **Architecture diagram (NEW):** Copy the ASCII TEST MACHINE <-> DEV MACHINE diagram from `.planning/PROJECT.md` lines 13-27 verbatim, fenced as ```` ```text ```` block.
   7. **Prerequisites (EXPAND):** Explicit version floors — Windows 10/11 x64, Python >= 3.11, uv >= 0.5, Windows Debugging Tools (link to installer at https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/), git >= 2.20, `claude` CLI on PATH (link to https://docs.claude.com/en/docs/claude-code/getting-started).
   8. **Install (REWRITE):** Full "from source" block:
      ```bash
-     git clone https://github.com/IdanG7/bridgeit.git
-     cd bridgeit
+     git clone https://github.com/IdanG7/stackly.git
+     cd stackly
      uv sync
-     uv run debugbridge doctor   # verifies prerequisites
+     uv run stackly doctor   # verifies prerequisites
      ```
      Add honest line: `"PyPI publish is tracked in [Phase 2c](./ROADMAP.md) — for now, install from source."` (roadmap link is relative; resolves to the planning dir which may not be public, so use `"tracked in the roadmap"` if `ROADMAP.md` is not at repo root — verify before shipping; if not at root, reference as `.planning/ROADMAP.md` or inline the statement.)
-  9. **Quick start (REWRITE):** Current 4-step flow is fine but add "On a fresh Windows 10/11 box, after installing prerequisites:" preface and insert `uv run debugbridge doctor` before `serve`.
-  10. **MCP client config snippets (EXPAND to 3 clients):** Claude Code via `claude mcp add debugbridge --transport http http://localhost:8585/mcp` (verify exact syntax against Claude Code docs at command-authoring time — if the CLI syntax differs, keep the JSON config example as primary and note CLI as alternative); Claude Desktop config block (current one is good); Cursor `.cursor/mcp.json` (current). Three fenced blocks, each with a `### Client name` subheading.
+  9. **Quick start (REWRITE):** Current 4-step flow is fine but add "On a fresh Windows 10/11 box, after installing prerequisites:" preface and insert `uv run stackly doctor` before `serve`.
+  10. **MCP client config snippets (EXPAND to 3 clients):** Claude Code via `claude mcp add stackly --transport http http://localhost:8585/mcp` (verify exact syntax against Claude Code docs at command-authoring time — if the CLI syntax differs, keep the JSON config example as primary and note CLI as alternative); Claude Desktop config block (current one is good); Cursor `.cursor/mcp.json` (current). Three fenced blocks, each with a `### Client name` subheading.
   11. **Tools table (KEEP):** Current 8-tool table stays; **add 9th row: `detach_process`** (added in Phase 2a.0.1). Descriptions in RESEARCH.md §4 implicit.
   12. **Fix-loop agent section (KEEP + REFINE):** Current is fine. Add callout after autonomous-mode example: `"> Hand-off mode is the default; \`--auto\` runs headless and should only be used after you've dogfooded the loop."`
-  13. **"Why DebugBridge" competitive wedge (NEW):** 8-10 line section naming alternatives that do ONE piece: CrashReporter (capture only), Sentry (telemetry only), manual Claude Code (dev-machine only). DebugBridge = remote capture + MCP + autonomous repair in one flow.
-  14. **Troubleshooting (NEW):** 5 FAQ items: (a) `debugbridge doctor` says pybag missing -> install Windows Debugging Tools; (b) symbols not resolved -> set `_NT_SYMBOL_PATH`; (c) port 8585 in use -> pass `--port N`; (d) `claude` command not found -> install Claude Code CLI; (e) attach fails with access denied -> run elevated.
+  13. **"Why Stackly" competitive wedge (NEW):** 8-10 line section naming alternatives that do ONE piece: CrashReporter (capture only), Sentry (telemetry only), manual Claude Code (dev-machine only). Stackly = remote capture + MCP + autonomous repair in one flow.
+  14. **Troubleshooting (NEW):** 5 FAQ items: (a) `stackly doctor` says pybag missing -> install Windows Debugging Tools; (b) symbols not resolved -> set `_NT_SYMBOL_PATH`; (c) port 8585 in use -> pass `--port N`; (d) `claude` command not found -> install Claude Code CLI; (e) attach fails with access denied -> run elevated.
   15. **Development section (MOVE):** Replace current dev block with `"For development setup, testing, and PR process, see [CONTRIBUTING.md](./CONTRIBUTING.md)."` (CONTRIBUTING.md itself lands in Task 2b.A.3.)
-  16. **Links footer (NEW):** Landing page (`https://debugbridge.dev` or chosen fallback), GitHub Issues, GitHub Discussions, CHANGELOG, CONTRIBUTING, LICENSE.
+  16. **Links footer (NEW):** Landing page (`https://stackly.dev` or chosen fallback), GitHub Issues, GitHub Discussions, CHANGELOG, CONTRIBUTING, LICENSE.
   17. **License section (KEEP).**
-  **Tone check — grep the final draft for forbidden words and fix each:** `auto-detect`, `automatically detects`, `cross-platform`, `pip install debugbridge\b` (the `\b` is the literal word-boundary test: `pip install debugbridge<space>` in a prose sentence is bad, `pip install debugbridge  # not yet on PyPI` in a code block with an honest-marketing comment is bad too — must be `clone and uv sync` per the honest-marketing constraint), `the fastest`, `the best`, `the only` (the wedge sentence is the one exception and should use "No other tool combines..." framing, which is falsifiable).
+  **Tone check — grep the final draft for forbidden words and fix each:** `auto-detect`, `automatically detects`, `cross-platform`, `pip install stackly\b` (the `\b` is the literal word-boundary test: `pip install stackly<space>` in a prose sentence is bad, `pip install stackly  # not yet on PyPI` in a code block with an honest-marketing comment is bad too — must be `clone and uv sync` per the honest-marketing constraint), `the fastest`, `the best`, `the only` (the wedge sentence is the one exception and should use "No other tool combines..." framing, which is falsifiable).
 - **Acceptance criteria:**
   - `README.md` file size between 180 and 280 lines.
-  - `grep -Ei '(auto-detect|automatically detect|cross-platform|\bpip install debugbridge\b|the fastest|the best|the only)' README.md` returns zero hits (except within the intentional "No other tool combines" wedge).
+  - `grep -Ei '(auto-detect|automatically detect|cross-platform|\bpip install stackly\b|the fastest|the best|the only)' README.md` returns zero hits (except within the intentional "No other tool combines" wedge).
   - All 16 sections above appear in order; section headings exist verbatim.
   - Embedded demo thumbnail link uses an `https://youtu.be/` URL (placeholder `XXXX` acceptable until Task 2b.C.5 patches it).
   - Tools table has exactly 9 data rows (not counting header + separator) AND `grep -E '^\| detach_process' README.md` returns exactly 1 match (which must be inside the tools table — verify by eye the matching line is a table row).
@@ -368,10 +368,10 @@ Eight tasks. All AUTO (pure text production). All can start immediately — none
 - **Action:** Write a 140-160 word script following RESEARCH.md §5 beat structure:
   - 0:00-0:05 Hook: crash_app on screen with red error dialog; text overlay "Your C++ app crashed on a test machine. What now?"
   - 0:05-0:15 Problem: voiceover describes the 30-min manual loop.
-  - 0:15-0:25 Solution setup: terminal shows `debugbridge fix --pid <crash_app PID> --repo .` running on the dev machine.
+  - 0:15-0:25 Solution setup: terminal shows `stackly fix --pid <crash_app PID> --repo .` running on the dev machine.
   - 0:25-0:40 Live capture: terminal output shows "Capturing crash... 47 stack frames... Launching Claude Code..."
   - 0:40-0:50 AI diagnosis: Claude Code window shows the briefing + a diagnosis message identifying the null deref; patch preview visible.
-  - 0:50-1:00 CTA: full-screen `debugbridge.dev` URL + GitHub logo + one-line read-aloud: "Works with Claude Code, Cursor, and Claude Desktop. Install from GitHub. debugbridge.dev."
+  - 0:50-1:00 CTA: full-screen `stackly.dev` URL + GitHub logo + one-line read-aloud: "Works with Claude Code, Cursor, and Claude Desktop. Install from GitHub. stackly.dev."
   **Include explicit structure:**
   - Script timing: table with cols `Beat | Time | Visual | Voiceover`.
   - Word count under the table (must be 140-160).
@@ -398,10 +398,10 @@ Eight tasks. All AUTO (pure text production). All can start immediately — none
   4. **Suggesting features** — direct to `.github/ISSUE_TEMPLATE/feature_request.yml`.
   5. **Development setup** — expanded from README:
      ```bash
-     git clone https://github.com/IdanG7/bridgeit.git
-     cd bridgeit
+     git clone https://github.com/IdanG7/stackly.git
+     cd stackly
      uv sync --all-extras
-     uv run debugbridge doctor
+     uv run stackly doctor
      ```
   6. **Running tests** — split unit vs integration:
      - `uv run pytest -m "not integration"` (unit, ~15s, CI-safe)
@@ -423,7 +423,7 @@ Eight tasks. All AUTO (pure text production). All can start immediately — none
 #### Task 2b.A.4 — Create CODE_OF_CONDUCT.md (Contributor Covenant 2.1)
 
 - **Files:** `CODE_OF_CONDUCT.md` (new at repo root).
-- **Action:** Copy Contributor Covenant 2.1 verbatim from https://www.contributor-covenant.org/version/2/1/code_of_conduct/ . Substitute the `[INSERT CONTACT METHOD]` placeholder with `coc@<domain>` where `<domain>` is the registered domain from Task 2b.0.1 (either `debugbridge.dev` or fallback). Email alias from Task 2b.0.2 must be active.
+- **Action:** Copy Contributor Covenant 2.1 verbatim from https://www.contributor-covenant.org/version/2/1/code_of_conduct/ . Substitute the `[INSERT CONTACT METHOD]` placeholder with `coc@<domain>` where `<domain>` is the registered domain from Task 2b.0.1 (either `stackly.dev` or fallback). Email alias from Task 2b.0.2 must be active.
 - **Acceptance criteria:**
   - File exists, 125-160 lines (Contributor Covenant 2.1 is 138 lines of prose + license notice).
   - `[INSERT CONTACT METHOD]` placeholder is replaced with the real `coc@<domain>` address.
@@ -438,17 +438,17 @@ Eight tasks. All AUTO (pure text production). All can start immediately — none
 
 - **Files:** `SECURITY.md` (new at repo root). Repo settings toggle via `gh` CLI.
 - **Action:**
-  1. Write `SECURITY.md` using the 20-line template in RESEARCH.md §8 "SECURITY.md". Substitute `security@debugbridge.dev` with `security@<chosen domain>`.
+  1. Write `SECURITY.md` using the 20-line template in RESEARCH.md §8 "SECURITY.md". Substitute `security@stackly.dev` with `security@<chosen domain>`.
   2. Enable GitHub private vulnerability reporting:
      ```bash
-     gh api -X PATCH /repos/IdanG7/bridgeit/private-vulnerability-reporting -f enabled=true
+     gh api -X PATCH /repos/IdanG7/stackly/private-vulnerability-reporting -f enabled=true
      # Alt via UI: repo Settings -> Code security and analysis -> Private vulnerability reporting -> Enable
      ```
-     (Verify endpoint via `gh api --method GET /repos/IdanG7/bridgeit` before making changes — GitHub API occasionally renames these.)
+     (Verify endpoint via `gh api --method GET /repos/IdanG7/stackly` before making changes — GitHub API occasionally renames these.)
 - **Acceptance criteria:**
   - `SECURITY.md` exists with the two reporting channels (GitHub private reporting + email).
   - Acknowledgment / triage / fix-timeline expectations present.
-  - `gh api /repos/IdanG7/bridgeit/private-vulnerability-reporting` returns `{"enabled": true}` (or the repo Security tab shows the feature enabled).
+  - `gh api /repos/IdanG7/stackly/private-vulnerability-reporting` returns `{"enabled": true}` (or the repo Security tab shows the feature enabled).
   - "Report a vulnerability" button visible on the repo's Security tab.
   - Test email to `security@<domain>` reaches maintainer.
 - **Size:** XS-S (30 min — template + one API call)
@@ -468,11 +468,11 @@ Eight tasks. All AUTO (pure text production). All can start immediately — none
   - `feature_request.yml`: name, description, title prefix `"[feature] "`, labels `["enhancement", "triage"]`, 4 form fields (problem, proposal, alternatives, scope checkboxes).
   - `config.yml`: `blank_issues_enabled: false`, contact links to Discussions and to security advisories.
   - `PULL_REQUEST_TEMPLATE.md`: Summary + Type-of-change + Test-plan + Checklist sections as specified.
-  Verify the `IdanG7/bridgeit` URL in `config.yml`'s contact links matches the actual repo slug.
+  Verify the `IdanG7/stackly` URL in `config.yml`'s contact links matches the actual repo slug.
 - **Acceptance criteria:**
   - All four files exist at their paths.
   - `yamllint` (or `python -c "import yaml; yaml.safe_load(open(p))"` as a fallback) parses the three YAML files without errors.
-  - Opening https://github.com/IdanG7/bridgeit/issues/new/choose (post-push) renders the two forms and hides "blank issue" option.
+  - Opening https://github.com/IdanG7/stackly/issues/new/choose (post-push) renders the two forms and hides "blank issue" option.
   - Opening a new PR draft locally (`gh pr create --draft`) pre-populates the template fields.
 - **Size:** S (30-45 min — mostly paste + verify)
 - **Autonomy:** AUTO
@@ -507,7 +507,7 @@ Eight tasks. All AUTO (pure text production). All can start immediately — none
   - Added GitHub issue templates (bug report + feature request) and PR template.
 
   ### Marketing
-  - Landing page shipped at https://debugbridge.dev (Astro + Tailwind, hosted on Cloudflare Pages).
+  - Landing page shipped at https://stackly.dev (Astro + Tailwind, hosted on Cloudflare Pages).
   - 60-second demo video recorded and uploaded (YouTube).
   - Submitted to MCP directories (see `.planning/phase-2b-public-launch/DIRECTORY_SUBMISSIONS.md` for current status — directory names will be named specifically at release time in Task 2b.F.3 based on which submissions are live).
 
@@ -598,7 +598,7 @@ Seven tasks. Mix of CHECKPOINT (dashboard clicks) and AUTO (local scaffolding + 
   - `site/src/components/Hero.astro`
   - `site/src/components/VideoEmbed.astro`
   - `site/src/components/HowItWorks.astro`
-  - `site/src/components/WhyDebugBridge.astro`
+  - `site/src/components/WhyStackly.astro`
   - `site/src/components/McpConfig.astro`
   - `site/src/components/WhoItsFor.astro`
   - `site/src/components/ScopeStatus.astro`
@@ -606,17 +606,17 @@ Seven tasks. Mix of CHECKPOINT (dashboard clicks) and AUTO (local scaffolding + 
   - `site/public/favicon.svg` (placeholder — design polish in Task 2b.D.4)
   - `site/public/logo.svg` (placeholder)
   - `site/public/robots.txt`
-- **Action:** Implement the 8-section structure per RESEARCH.md §3 "DebugBridge-specific section map":
+- **Action:** Implement the 8-section structure per RESEARCH.md §3 "Stackly-specific section map":
   - **Pre-step 0 (dependencies):** Run `npm i lite-youtube-embed` inside `site/`. Verify the entry appears in `site/package.json` under `dependencies`. Commit the updated `site/package.json` and `site/package-lock.json`. This MUST land before implementing the VideoEmbed component below.
-  - **Hero:** Tagline ("Remote crash capture for Claude Code, Cursor, and Claude Desktop"), one-sentence elaboration, primary CTA button `[Watch 60s demo]` scrolling to #demo, secondary CTA `[View on GitHub]` to https://github.com/IdanG7/bridgeit. Badges row (MIT, Python 3.11+, Windows 10/11).
+  - **Hero:** Tagline ("Remote crash capture for Claude Code, Cursor, and Claude Desktop"), one-sentence elaboration, primary CTA button `[Watch 60s demo]` scrolling to #demo, secondary CTA `[View on GitHub]` to https://github.com/IdanG7/stackly. Badges row (MIT, Python 3.11+, Windows 10/11).
   - **VideoEmbed:** Use `lite-youtube-embed` wrapper (dependency installed in Pre-step 0). Import its CSS + web component from `lite-youtube-embed`. Props: `videoId` (placeholder `dQw4w9WgXcQ` until Task 2b.C.4 supplies real; Task 2b.C.5 patches). Zero-JS-until-interaction behavior documented in component.
-  - **HowItWorks:** 3-step grid. (1) `dbgsrv.exe` on test box (one command), (2) `debugbridge serve` on dev box (Streamable HTTP MCP), (3) AI client sees the crash via MCP. ASCII or SVG diagram inline.
-  - **WhyDebugBridge:** Competitive-wedge section. 3-column comparison grid: DebugBridge vs CrashReporter (capture-only, no MCP, no repair) vs Sentry (telemetry, not debug state) vs manual-Claude-Code (dev-machine process only). Grid checkmarks/X marks.
+  - **HowItWorks:** 3-step grid. (1) `dbgsrv.exe` on test box (one command), (2) `stackly serve` on dev box (Streamable HTTP MCP), (3) AI client sees the crash via MCP. ASCII or SVG diagram inline.
+  - **WhyStackly:** Competitive-wedge section. 3-column comparison grid: Stackly vs CrashReporter (capture-only, no MCP, no repair) vs Sentry (telemetry, not debug state) vs manual-Claude-Code (dev-machine process only). Grid checkmarks/X marks.
   - **McpConfig:** Tabbed component, three tabs: Claude Code / Cursor / Claude Desktop. Each tab shows the exact config snippet. Uses a minimal Tailwind-only tab state (no JS framework — can use `<details>`/`<summary>` for progressive enhancement).
   - **WhoItsFor:** 5 user-type cards (game studios, embedded/IoT, desktop app devs, enterprise C++, DevOps/SRE). One-sentence pain-point per card, from PROJECT.md target-users table.
   - **ScopeStatus (NEW — required by GOAL.md "Today vs. Roadmap" constraint):** Two-column block with unique anchor `id="scope-status"`. Left column heading `Today`, content: "Windows 10/11 + Claude Code / Cursor / Claude Desktop + hand-off fix-loop + install from source." Right column heading `Roadmap`, content: "PyPI install (2c), crash auto-detection (2.5), Linux / macOS (3), enterprise / cloud (4)." Place below the install CTA / McpConfig section and above Footer. Both column headings must render as literal text `Today` and `Roadmap` inside the `#scope-status` section so the acceptance-criteria grep lands two hits in one anchor.
   - **Footer:** Repeated `[Install from GitHub]` CTA + links to GitHub, Issues, Discussions, LICENSE. Text: `"MIT-licensed. Maintained by @<handle-or-name>. Copyright (c) 2026."`
-  - **index.astro:** Imports BaseLayout with `title="DebugBridge — Remote crash capture for Claude Code, Cursor, Claude Desktop"`, `description` (<= 160 chars), composed in order: Hero -> VideoEmbed -> HowItWorks -> WhyDebugBridge -> McpConfig -> WhoItsFor -> ScopeStatus -> Footer.
+  - **index.astro:** Imports BaseLayout with `title="Stackly — Remote crash capture for Claude Code, Cursor, Claude Desktop"`, `description` (<= 160 chars), composed in order: Hero -> VideoEmbed -> HowItWorks -> WhyStackly -> McpConfig -> WhoItsFor -> ScopeStatus -> Footer.
   - **robots.txt:**
     ```
     User-agent: *
@@ -632,7 +632,7 @@ Seven tasks. Mix of CHECKPOINT (dashboard clicks) and AUTO (local scaffolding + 
   - `site/dist/sitemap-index.xml` exists and references `/`.
   - `site/dist/robots.txt` contains the Sitemap directive pointing at the chosen domain.
   - **`grep -Ei '(auto-detect|automatically detect|cross-platform|pip install|the fastest|the best|the only)' site/src/**/*.astro` returns zero hits** (honest-marketing grep — same as README).
-  - All external links open `https://github.com/IdanG7/bridgeit` and are not broken.
+  - All external links open `https://github.com/IdanG7/stackly` and are not broken.
   - Video embed renders `lite-youtube-embed` wrapper with a placeholder thumbnail (real thumbnail lands post-Task 2b.C.3).
   - **"Today vs. Roadmap" scope-status section present and grep-verifiable:** `grep -Ei '(today|roadmap)' site/src/pages/index.astro` (or the rendered `site/dist/index.html`) returns >= 2 hits within the single `#scope-status` section. Verify by `grep -A 20 'id="scope-status"' site/src/components/ScopeStatus.astro | grep -cEi '(today|roadmap)'` returns >= 2.
 - **Size:** L (6-8h per RESEARCH.md §12)
@@ -643,7 +643,7 @@ Seven tasks. Mix of CHECKPOINT (dashboard clicks) and AUTO (local scaffolding + 
 
 - **Files:** none (external dashboard action). Record outcome in `.planning/phase-2b-public-launch/DOMAIN.md` (append `Cloudflare Pages project: <project name>, first deploy: <URL>`).
 - **Action (CHECKPOINT — human):**
-  1. Cloudflare dashboard -> Workers & Pages -> Create -> Pages -> "Connect to Git" -> select `IdanG7/bridgeit`.
+  1. Cloudflare dashboard -> Workers & Pages -> Create -> Pages -> "Connect to Git" -> select `IdanG7/stackly`.
   2. Set production branch: `main`. Preview branch pattern: all branches (so PRs get previews).
   3. Build settings:
      - **Framework preset:** Astro
@@ -724,7 +724,7 @@ Five tasks. Mix of AUTO (review/caption writing) and CHECKPOINT (recording, exte
 
 #### Task 2b.C.2 — Record demo footage (OBS, multiple takes)
 
-- **Files:** Raw recordings in local `C:/Users/<user>/Videos/debugbridge-demo-raw/` (NOT committed — recordings are local artifacts). Final remuxed MP4 also local until upload.
+- **Files:** Raw recordings in local `C:/Users/<user>/Videos/stackly-demo-raw/` (NOT committed — recordings are local artifacts). Final remuxed MP4 also local until upload.
 - **Action (CHECKPOINT — human):**
   1. Install OBS Studio 30+ from https://obsproject.com/ if not installed.
   2. Apply RESEARCH.md §5 "Settings for 1080p60 developer demos":
@@ -756,7 +756,7 @@ Five tasks. Mix of AUTO (review/caption writing) and CHECKPOINT (recording, exte
   3. Edit-by-transcript: remove bad takes, silences, filler words ("um", "uh", "so").
   4. Run "Remove Filler Words" suggester; review each suggested cut.
   5. Add on-screen text overlays at beat transitions per DEMO_SCRIPT.md.
-  6. Proofread auto-transcript for technical terms: `pybag` (often transcribed "pie bag"), `DbgEng`, `MCP`, `Claude Code`, `debugbridge`, `Cursor`, etc. Fix each manually.
+  6. Proofread auto-transcript for technical terms: `pybag` (often transcribed "pie bag"), `DbgEng`, `MCP`, `Claude Code`, `stackly`, `Cursor`, etc. Fix each manually.
   7. Export Multitrack -> MP4 (1080p, H.264, 60fps) + `.srt` separately. No watermark (requires paid tier).
   8. Create thumbnail: 1280x720 PNG. Tools: Canva free, Figma, or static frame from the recording with added overlay. Must show crash dialog or debugger state — something visually distinct. **Do NOT** use shouty-YouTube-influencer aesthetic (big arrows, yelling face).
   9. **Write the thumbnail to both paths (pre-decided — do not punt to execution):**
@@ -779,14 +779,14 @@ Five tasks. Mix of AUTO (review/caption writing) and CHECKPOINT (recording, exte
 - **Action (CHECKPOINT — human):**
   1. Upload the final MP4 from Task 2b.C.3 to the YouTube channel chosen in Task 2b.0.4.
   2. Visibility: **unlisted** (for soak period).
-  3. Title: `DebugBridge — Remote crash capture for Claude Code (60s demo)`.
+  3. Title: `Stackly — Remote crash capture for Claude Code (60s demo)`.
   4. Description (pull from a reusable snippet — RESEARCH.md §7.Twitter tweet 1 is a starting point):
      ```
-     DebugBridge is an MCP server that exposes live Windows debugger state to Claude Code, Cursor, and Claude Desktop. One command captures a remote crash; Claude Code reads the stack and proposes a fix.
+     Stackly is an MCP server that exposes live Windows debugger state to Claude Code, Cursor, and Claude Desktop. One command captures a remote crash; Claude Code reads the stack and proposes a fix.
 
-     Install (from source): https://github.com/IdanG7/bridgeit
+     Install (from source): https://github.com/IdanG7/stackly
      Landing page: https://<domain>
-     Docs: https://github.com/IdanG7/bridgeit#quick-start
+     Docs: https://github.com/IdanG7/stackly#quick-start
      ```
   5. Tags: `mcp`, `model context protocol`, `claude code`, `debugger`, `windows`, `c++`, `crash reporting`, `developer tools`.
   6. Upload captions: use the `.srt` from Task 2b.C.3, NOT YouTube's auto-generated captions. Set language to English.
@@ -837,7 +837,7 @@ Four tasks. All can run in parallel with Tracks A-C (no dependency on landing/vi
 - **Files:** none (external action via `gh` CLI). Record outcome in DECISIONS.md.
 - **Action (AUTO with CHECKPOINT if `gh` hits rate limit or permission error — in practice this is one API call):**
   ```bash
-  gh repo edit IdanG7/bridgeit \
+  gh repo edit IdanG7/stackly \
     --description "Remote crash capture MCP server for native Windows applications. Exposes live DbgEng debugger state (stack, exception, threads, locals) to Claude Code, Cursor, and Claude Desktop." \
     --homepage "https://<domain>" \
     --add-topic mcp \
@@ -857,8 +857,8 @@ Four tasks. All can run in parallel with Tracks A-C (no dependency on landing/vi
   ```
   (Description stays under 350 chars per GitHub API cap; the one above is ~260 chars.)
 - **Acceptance criteria:**
-  - `gh repo view IdanG7/bridgeit --json description,homepageUrl,repositoryTopics` returns the expected description, homepage `https://<domain>`, and all 13 topics.
-  - Visiting `https://github.com/IdanG7/bridgeit` shows the About sidebar populated (description, homepage link, topic chips).
+  - `gh repo view IdanG7/stackly --json description,homepageUrl,repositoryTopics` returns the expected description, homepage `https://<domain>`, and all 13 topics.
+  - Visiting `https://github.com/IdanG7/stackly` shows the About sidebar populated (description, homepage link, topic chips).
 - **Size:** XS (5 min)
 - **Autonomy:** AUTO
 - **Dependencies:** 2b.0.1.
@@ -870,7 +870,7 @@ Four tasks. All can run in parallel with Tracks A-C (no dependency on landing/vi
   1. Design a 1280x640 PNG, < 1 MB: project logo + tagline + a screenshot of the debugger state (or a stylized version). Tools: Canva free template, Figma, or `socialify.git.ci` for auto-generated fallback. Avoid shouty-influencer aesthetic.
   2. Save to `docs/social-preview.png` in the repo (archival).
   3. GitHub repo -> Settings -> General -> Social preview -> Upload new image.
-  4. Verify by posting `https://github.com/IdanG7/bridgeit` in a Slack/Discord/Twitter DM to self — the unfurl should use the new preview.
+  4. Verify by posting `https://github.com/IdanG7/stackly` in a Slack/Discord/Twitter DM to self — the unfurl should use the new preview.
 - **Acceptance criteria:**
   - `docs/social-preview.png` exists, 1280x640, < 1 MB.
   - GitHub settings show the custom social preview (not the auto-generated default).
@@ -885,7 +885,7 @@ Four tasks. All can run in parallel with Tracks A-C (no dependency on landing/vi
 - **Files:** `.planning/phase-2b-public-launch/LAUNCH_POSTS.md` (new).
 - **Action:** Write drafts following the conventions in RESEARCH.md §7. Structure:
   ```markdown
-  # DebugBridge — Launch Post Drafts
+  # Stackly — Launch Post Drafts
 
   > **NOT YET PUBLISHED.** These are drafts only. Publication is a separate go/no-go decision after landing page + video + directory submissions are all live. See `LAUNCH_READINESS.md`.
 
@@ -898,8 +898,8 @@ Four tasks. All can run in parallel with Tracks A-C (no dependency on landing/vi
 
   ## Hacker News — "Show HN"
 
-  **Title (under 80 chars):** `Show HN: DebugBridge – Remote crash capture for Windows C++, exposed via MCP`
-  **Link target:** `https://github.com/IdanG7/bridgeit` (NOT the landing page — HN readers click through to READMEs).
+  **Title (under 80 chars):** `Show HN: Stackly – Remote crash capture for Windows C++, exposed via MCP`
+  **Link target:** `https://github.com/IdanG7/stackly` (NOT the landing page — HN readers click through to READMEs).
   **Timing:** Tue/Wed/Thu, 8-11am ET.
   **First-comment body (4-8 sentences — follows RESEARCH.md §7 HN structure):**
   > [full draft here, 4-8 sentences, first-person, no superlatives, honest limitations, request for specific feedback]
@@ -908,9 +908,9 @@ Four tasks. All can run in parallel with Tracks A-C (no dependency on landing/vi
 
   ## Reddit — r/cpp (primary target)
 
-  **Title:** `DebugBridge: Remote DbgEng capture exposed to Claude Code via MCP (open source)`
+  **Title:** `Stackly: Remote DbgEng capture exposed to Claude Code via MCP (open source)`
   **Flair:** "Show and Tell" or "Tooling" (verify at post time — Task 2b.F.2).
-  **Link target:** `https://github.com/IdanG7/bridgeit`.
+  **Link target:** `https://github.com/IdanG7/stackly`.
   **Body (technical war-story framing — NOT a marketing pitch):**
   > [draft walking through a technical decision — e.g., "we used WinDbg command parsing because pybag's wrappers for GetLineByOffset raise E_NOTIMPL; here's the implementation and tradeoffs"; mention project in closing paragraph]
 
@@ -921,7 +921,7 @@ Four tasks. All can run in parallel with Tracks A-C (no dependency on landing/vi
   **Where:** weekly Feedback Friday thread only (standalone posts = 24h ban per sidebar rules — verify at post time).
   **Timing:** Friday morning ET.
   **Body (2-3 sentences + link):**
-  > [short draft framing DebugBridge for game-studio crash triage]
+  > [short draft framing Stackly for game-studio crash triage]
 
   ---
 
@@ -975,7 +975,7 @@ Four tasks. All can run in parallel with Tracks A-C (no dependency on landing/vi
   - `site/public/og-image.png` (new: 1200x630 social card image).
 - **Action:**
   1. Design favicon (24x24 effective, but SVG so it scales) — monochrome glyph (e.g., stylized "DB" or a debugger-bridge pictogram).
-  2. Design logo (horizontal SVG: glyph + wordmark "DebugBridge").
+  2. Design logo (horizontal SVG: glyph + wordmark "Stackly").
   3. Design `og-image.png` at 1200x630: project name + tagline + small screenshot. This is the image surfaced in Twitter / LinkedIn / Slack link unfurls of `https://<domain>` (distinct from GitHub repo social preview in 2b.D.2).
   4. Confirm favicon renders at 16x16 and 32x32 (browsers/OS scale it down automatically).
   5. Push; Cloudflare Pages redeploys.
@@ -1020,11 +1020,11 @@ Five tasks. All depend on README + landing page URL + video URL being live. Init
 
   ## Per-directory metadata prep (shared)
 
-  **Canonical name:** DebugBridge
-  **Namespace:** io.github.idang7/debugbridge (lowercase per registry convention)
+  **Canonical name:** Stackly
+  **Namespace:** io.github.idang7/stackly (lowercase per registry convention)
   **One-line description (<= 120 chars):** Remote crash capture MCP server for Windows native apps. Exposes live DbgEng debugger state to Claude Code, Cursor, Desktop.
-  **Install command (source-only for 2b):** `git clone https://github.com/IdanG7/bridgeit.git && cd bridgeit && uv sync`
-  **Config snippet (Claude Desktop):** `{"mcpServers": {"debugbridge": {"url": "http://localhost:8585/mcp"}}}`
+  **Install command (source-only for 2b):** `git clone https://github.com/IdanG7/stackly.git && cd stackly && uv sync`
+  **Config snippet (Claude Desktop):** `{"mcpServers": {"stackly": {"url": "http://localhost:8585/mcp"}}}`
   **License:** MIT
   **Links:** README, landing page, demo video — all three populated from real URLs.
 
@@ -1050,12 +1050,12 @@ Five tasks. All depend on README + landing page URL + video URL being live. Init
      ```json
      {
        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-       "name": "io.github.idang7/debugbridge",
-       "title": "DebugBridge",
+       "name": "io.github.idang7/stackly",
+       "title": "Stackly",
        "description": "Remote crash capture MCP server for Windows native apps. Exposes live DbgEng debugger state (stack, locals, threads, exception info) to MCP clients.",
        "version": "0.2.1",
        "repository": {
-         "url": "https://github.com/IdanG7/bridgeit",
+         "url": "https://github.com/IdanG7/stackly",
          "source": "github"
        },
        "websiteUrl": "https://<chosen-domain>"
@@ -1065,12 +1065,12 @@ Five tasks. All depend on README + landing page URL + video URL being live. Init
   2. Install `mcp-publisher` CLI. On Windows: download the latest Windows binary from https://github.com/modelcontextprotocol/registry/releases and place on PATH, OR use `brew install mcp-publisher` if on a mac / WSL.
   3. Authenticate: `mcp-publisher login github` (OAuth device flow — paste code at github.com/login/device).
   4. Publish: `mcp-publisher publish` from the repo root.
-  5. Verify: `curl "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.idang7/debugbridge"` returns the published entry.
-  6. Update DIRECTORY_SUBMISSIONS.md row: submission date, listing URL (`https://registry.modelcontextprotocol.io/v0.1/servers/io.github.idang7/debugbridge` or similar), status = `live`.
+  5. Verify: `curl "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.idang7/stackly"` returns the published entry.
+  6. Update DIRECTORY_SUBMISSIONS.md row: submission date, listing URL (`https://registry.modelcontextprotocol.io/v0.1/servers/io.github.idang7/stackly` or similar), status = `live`.
 - **Acceptance criteria:**
   - `server.json` exists at repo root, validates against the linked schema (spot-check via https://validator.schemastore.org or paste into https://www.jsonschemavalidator.net).
   - `mcp-publisher publish` exits 0.
-  - Curl query above returns the server entry with `name == "io.github.idang7/debugbridge"`.
+  - Curl query above returns the server entry with `name == "io.github.idang7/stackly"`.
   - DIRECTORY_SUBMISSIONS.md updated.
 - **Size:** M (30-60 min, most of it OAuth + first-time CLI install on Windows)
 - **Autonomy:** CHECKPOINT (OAuth device flow)
@@ -1080,7 +1080,7 @@ Five tasks. All depend on README + landing page URL + video URL being live. Init
 #### Task 2b.E.2 — Submit to Smithery (`smithery.ai`)
 
 - **Files:** Update `DIRECTORY_SUBMISSIONS.md` row for Smithery.
-- **Action (CHECKPOINT — human):** Use web form (RESEARCH.md §6B option 2 — not CLI, since DebugBridge is source-install, not a hosted URL):
+- **Action (CHECKPOINT — human):** Use web form (RESEARCH.md §6B option 2 — not CLI, since Stackly is source-install, not a hosted URL):
   1. Go to https://smithery.ai/new .
   2. Fill form with values from DIRECTORY_SUBMISSIONS.md "shared metadata" block.
   3. Submit.
@@ -1124,13 +1124,13 @@ Five tasks. All depend on README + landing page URL + video URL being live. Init
 - **Files:** PR to `punkpeye/awesome-mcp-servers` (external repo). Update DIRECTORY_SUBMISSIONS.md row.
 - **Action (AUTO — git + gh, no form fill):**
   1. `gh repo clone punkpeye/awesome-mcp-servers <tmp>`.
-  2. Branch: `add/debugbridge`.
+  2. Branch: `add/stackly`.
   3. Locate the "Developer Tools" or "Debugging" category. Add line in alphabetical order:
      ```markdown
-     - [IdanG7/bridgeit](https://github.com/IdanG7/bridgeit) 🎖️ - Remote crash capture for native Windows processes. Exposes DbgEng debugger state (call stack, exception info, threads, locals) to MCP clients.
+     - [IdanG7/stackly](https://github.com/IdanG7/stackly) 🎖️ - Remote crash capture for native Windows processes. Exposes DbgEng debugger state (call stack, exception info, threads, locals) to MCP clients.
      ```
   4. Respect their CONTRIBUTING.md format — the 🎖️ emoji means "official" (verify against their latest conventions; emoji set may have changed).
-  5. `gh pr create --title "Add DebugBridge" --body "<one-liner + link to README + license>"`.
+  5. `gh pr create --title "Add Stackly" --body "<one-liner + link to README + license>"`.
   6. Update tracker row: PR URL, date, status = `pending`.
   7. Serves as R2 Smithery-rejection fallback if needed.
 - **Acceptance criteria:**
@@ -1252,11 +1252,11 @@ Three tasks. The gate that asserts all 7 GOAL criteria are met before the phase 
 - **Files:**
   - `pyproject.toml` (bump `version = "0.2.1"`).
   - `CHANGELOG.md` (promote Unreleased to `## [0.2.1] - <date>`).
-  - `src/debugbridge/__init__.py` (bump `__version__` if present — verify).
+  - `src/stackly/__init__.py` (bump `__version__` if present — verify).
   - `server.json` (already bumped in Task 2b.E.1 — verify it matches).
   - `.planning/phase-2b-public-launch/LAUNCH_READINESS.md` (flip "Exit status" fields to YES + date).
 - **Action:**
-  1. Bump version in `pyproject.toml` to `0.2.1`. Then, for `src/debugbridge/__init__.py`: run `grep -c '^__version__' src/debugbridge/__init__.py`. If the count is 0, do NOT create the attribute — `pyproject.toml` is authoritative and the bump is a single-file change to `pyproject.toml` only. If the count is >= 1, bump `__version__` to `"0.2.1"` in lockstep with `pyproject.toml` (this is a version-string change only — no functional code changes, consistent with the phase-level constraint). The frontmatter lists `src/debugbridge/__init__.py` with that disclosure comment.
+  1. Bump version in `pyproject.toml` to `0.2.1`. Then, for `src/stackly/__init__.py`: run `grep -c '^__version__' src/stackly/__init__.py`. If the count is 0, do NOT create the attribute — `pyproject.toml` is authoritative and the bump is a single-file change to `pyproject.toml` only. If the count is >= 1, bump `__version__` to `"0.2.1"` in lockstep with `pyproject.toml` (this is a version-string change only — no functional code changes, consistent with the phase-level constraint). The frontmatter lists `src/stackly/__init__.py` with that disclosure comment.
   2. Promote CHANGELOG's `## [Unreleased]` to `## [0.2.1] - YYYY-MM-DD`.
   2a. Read `.planning/phase-2b-public-launch/DIRECTORY_SUBMISSIONS.md`; replace the generic Marketing bullet ("Submitted to MCP directories (see DIRECTORY_SUBMISSIONS.md ...)") with the specific directory names that are `live` at phase-exit time. If a submission is still `pending` or `rejected`, do NOT list it. Minimum 4 named live directories are required to clear GOAL-4; if fewer than 4 are live, pause and resolve before tagging.
   3. Verify `server.json` `version` matches.
@@ -1356,7 +1356,7 @@ Critical path: 2b.0.1 -> 2b.A.2 -> 2b.C.1 -> 2b.C.2 -> 2b.C.3 -> 2b.C.4 -> 2b.C.
 
 From GOAL.md — anything in this list that appears in a task is a bug in the plan:
 
-- NO PyPI publish work (`pip install debugbridge` stays Phase 2c).
+- NO PyPI publish work (`pip install stackly` stays Phase 2c).
 - NO signed wheels.
 - NO standalone docs site (separate from landing page).
 - NO publishing of launch posts (drafts only).
@@ -1367,7 +1367,7 @@ From GOAL.md — anything in this list that appears in a task is a bug in the pl
 - NO non-Windows demo footage.
 - NO contributor onboarding video.
 - NO Lighthouse CI as merge gate (manual run pre-launch only).
-- NO functional code changes to `src/debugbridge/`.
+- NO functional code changes to `src/stackly/`.
 
 ## 7. Manual verification needed for phase exit
 
@@ -1382,11 +1382,11 @@ Beyond automated checks in 2b.F.2, a human must sign off on:
 2. **48-hour soak period** — landing page deployed, no changes for 48h, no broken links reported, analytics show no 404 spikes. (R4 mitigation.)
 3. **Honest-marketing final pass** — grep all public artifacts for the forbidden phrases one final time before 2b.F.3:
    ```bash
-   grep -rEi '(auto-detect|automatically detect|cross-platform|\bpip install debugbridge\b|the fastest|the best|the only|first-of-its-kind)' \
+   grep -rEi '(auto-detect|automatically detect|cross-platform|\bpip install stackly\b|the fastest|the best|the only|first-of-its-kind)' \
      README.md site/src/ .planning/phase-2b-public-launch/LAUNCH_POSTS.md server.json
    ```
    Zero unintentional hits required.
-4. **GOAL-7 one-week discoverability check** — 7 days post-launch, manually Google "DebugBridge MCP" and "debugbridge crash fix"; confirm landing page or GitHub repo appears in first 2 pages. Log in `.planning/phase-2b-public-launch/DISCOVERABILITY_LOG.md`. (Per GOAL.md: not blocking phase exit, but tracked.)
+4. **GOAL-7 one-week discoverability check** — 7 days post-launch, manually Google "Stackly MCP" and "stackly crash fix"; confirm landing page or GitHub repo appears in first 2 pages. Log in `.planning/phase-2b-public-launch/DISCOVERABILITY_LOG.md`. (Per GOAL.md: not blocking phase exit, but tracked.)
 
 ---
 
@@ -1399,7 +1399,7 @@ grep -rEi \
   --include='*.md' \
   --include='*.astro' \
   --include='*.json' \
-  '(auto-detect|automatically detect|cross-platform|\bpip install debugbridge\b|the fastest|the best|the only|first-of-its-kind)' \
+  '(auto-detect|automatically detect|cross-platform|\bpip install stackly\b|the fastest|the best|the only|first-of-its-kind)' \
   README.md \
   CONTRIBUTING.md \
   SECURITY.md \
@@ -1415,7 +1415,7 @@ grep -rEi \
 
 | Q | Topic | Resolution |
 |---|-------|------------|
-| Q1 | debugbridge.dev availability | Task 2b.0.1 CHECKPOINT Day 0; fallbacks `debugbridge.app > getdebugbridge.dev > usedebugbridge.dev > debugbridge.run` |
+| Q1 | stackly.dev availability | Task 2b.0.1 CHECKPOINT Day 0; fallbacks `stackly.app > getstackly.dev > usestackly.dev > stackly.run` |
 | Q2 | site/ subdir vs sibling repo | **site/ subdir** (Decision #1) |
 | Q3 | Twitter handle | Task 2b.0.3 CHECKPOINT; three options (personal / project / skip) |
 | Q4 | r/programming technical blog | **Deferred to 2c** (Decision #10); LAUNCH_POSTS.md marks `DEFERRED_TO_2C` |

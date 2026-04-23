@@ -1,8 +1,8 @@
-# DebugBridge — Project Brief
+# Stackly — Project Brief
 
 **One-line:** An open-source MCP server that captures live debug state from remote Windows processes, plus an autonomous AI agent that reads crash data, generates fixes, and opens PRs — so any MCP-capable AI client (Claude Code, Cursor, Claude Desktop) can see a remote crash directly instead of devs copy-pasting stack traces.
 
-**Why this exists.** When a C/C++ app crashes on a remote test PC, no AI coding tool can see the remote process. Developers spend 30–60 minutes per crash walking over, reading the stack, pasting it into chat, writing a fix, and pushing. Multiply by 5–10 crashes per day across a team and it destroys flow state. DebugBridge kills that loop.
+**Why this exists.** When a C/C++ app crashes on a remote test PC, no AI coding tool can see the remote process. Developers spend 30–60 minutes per crash walking over, reading the stack, pasting it into chat, writing a fix, and pushing. Multiply by 5–10 crashes per day across a team and it destroys flow state. Stackly kills that loop.
 
 **Wedge:** Full debugger-level state (stack, locals, memory, threads, exception info) from a *remote* process, exposed to AI tools via MCP, with an autonomous repair agent that generates + validates fixes. No competing tool combines live remote debug capture, MCP exposure, local build validation, and PR creation.
 
@@ -13,7 +13,7 @@
 ```
     TEST MACHINE                              DEV MACHINE
 ┌──────────────────┐                    ┌─────────────────────────────┐
-│  Your C/C++ app  │                    │   debugbridge MCP server    │
+│  Your C/C++ app  │                    │   stackly MCP server    │
 │  (crashes)       │ ─── network ────── │   (Python + pybag + MCP)    │
 │  dbgsrv.exe      │                    │                             │
 │  (one command)   │                    │   Streamable HTTP on :8585  │
@@ -21,7 +21,7 @@
                                         │        ▼                    │
                                         │   Claude Code / Cursor      │
                                         │                             │
-                                        │   debugbridge fix agent     │
+                                        │   stackly fix agent     │
                                         │   (crash → patch → PR)      │
                                         └─────────────────────────────┘
 ```
@@ -44,11 +44,11 @@ The agent runs on the dev machine (not the test machine) because QA rigs must st
 
 ## Current state (2026-04-16)
 
-**Phase 1 MVP: ✅ SHIPPED** (pushed to https://github.com/IdanG7/bridgeit, commit d514fb4)
+**Phase 1 MVP: ✅ SHIPPED** (pushed to https://github.com/IdanG7/stackly, commit d514fb4)
 
 What works today:
 - 8 MCP tools exposed via `FastMCP` on Streamable HTTP (attach_process, get_exception, get_callstack, get_threads, get_locals, set_breakpoint, step_next, continue_execution)
-- `debugbridge` CLI with `serve` / `doctor` / `version`
+- `stackly` CLI with `serve` / `doctor` / `version`
 - Pybag `UserDbg` wrapper in `DebugSession` with per-method threading.Lock
 - Lazy pybag import so CLI runs on machines without Windows Debugging Tools installed
 - Environment detection + canonical-path PATH injection
@@ -90,7 +90,7 @@ What works today:
 - **DbgEng COM is single-threaded** → all session methods serialized behind `threading.Lock`
 - **Pybag is polling-based** (`dbg.wait()` blocks on a worker thread) — NOT push-callback; event-callback work in Phase 2.5 will require careful threading
 - **`GetLineByOffset`, `GetLastEventInformation` not implemented in pybag** → use WinDbg command parsing (stable, documented output)
-- **Windows Debugging Tools are a 2GB SDK install** — not a pip dependency; `debugbridge doctor` detects + guides
+- **Windows Debugging Tools are a 2GB SDK install** — not a pip dependency; `stackly doctor` detects + guides
 
 ---
 
